@@ -1,0 +1,70 @@
+# Design System v2 — Indigo + Coral
+
+Supersedes the earlier blue-only palette. This is now the single source of truth — swap these values into your Stitch prompts, the Antigravity instructions doc, and your globals.css/tailwind.config.ts.
+
+Core shift: brand/structure and primary-action are now two different colors, so CTAs actually pop instead of blending into everything else.
+
+## 1. Token Table
+
+### Brand / Structure (Indigo)
+Token	Hex	Usage
+brand	#4338CA	Sidebar active state, links, focus rings, chart primary series, selected states
+brand-dark	#3730A3	Hover/pressed on brand elements
+brand-light	#EEF2FF	Selected row background, subtle highlight chips, hover background
+
+### Primary Action / CTA (Coral — reserved ONLY for the main action)
+Token	Hex	Usage
+cta	#FF6B5B	The ONE primary button on any screen — "Sign Up", "Save", "Create Account", "Add Product", "Send OTP"
+cta-dark	#E5503F	CTA hover/pressed state
+cta-light	#FFF0EE	Rare — subtle background tint if a CTA-adjacent callout is needed
+
+*Rule: only one cta-colored element per screen. If a screen has both a primary action and a secondary important action, the second one uses brand, not a second coral element — coral must stay rare to keep its punch.*
+
+### Neutrals
+Token	Hex	Usage
+bg-app	#F7F7FB	App background behind cards/tables (slightly cooler/lighter than before)
+bg-surface	#FFFFFF	Cards, tables, modals
+bg-sidebar	#181535	Sidebar — deep indigo-black, not navy anymore
+border-default	#E4E4F0	Default borders
+border-strong	#C7C7E0	Stronger dividers, table header borders
+text-primary	#151328	Headings, primary text (near-black with a hint of indigo)
+text-secondary	#65637D	Labels, helper text, muted text
+text-on-dark	#FFFFFF	Text on sidebar
+text-on-dark-muted	#9694B8	Inactive sidebar items
+
+### Status (more saturated than v1 — no longer pastel/forgettable)
+Token	Hex (bg)	Hex (text)	Usage
+success	#D1FAE5	#047857	In stock, Paid, positive trend
+warning	#FEF3C7	#B45309	Low stock, Partial payment, expiring soon
+danger	#FEE2E2	#DC2626	Out of stock, Unpaid, overdue
+info	#E0E7FF	#4338CA	Neutral tags, informational badges
+
+## 2. Component Rules (updated)
+
+### Buttons
+- Primary/CTA: bg-cta text-white hover:bg-cta-dark, rounded-lg — only ONE per screen
+- Secondary: bg-transparent border border-border-default text-text-primary hover:bg-bg-app
+- Tertiary/link-style: text-brand hover:text-brand-dark, no background
+- Destructive: text-danger bg-transparent hover:bg-danger-bg
+
+### Forms
+- Default border: border-default
+- Focus border: brand (#4338CA), 2px, with brand-light glow ring
+- Labels: text-secondary
+- *Do NOT use coral anywhere in form fields — coral is reserved for the submit button only*
+
+### Popups/Modals
+- Overlay: black at 50% opacity
+- Surface: bg-surface, rounded-xl, shadow-lg
+- Footer primary action: cta button; cancel: secondary style
+
+### Tables
+- Header row: bg-app background, text-secondary, uppercase, border-strong bottom border
+- Row hover: brand-light
+- Status badges: success/warning/danger/info tokens only, rounded-full pills
+- *Never use cta coral inside a table — coral is exclusively for standalone action buttons, not embedded UI*
+
+### Sidebar
+- Background: bg-sidebar (#181535)
+- Active item: border-l-4 border-brand, tinted background, white text
+- Inactive: text-on-dark-muted

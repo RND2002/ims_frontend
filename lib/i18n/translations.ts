@@ -1,0 +1,176 @@
+export const translations = {
+  en: {
+    nav: {
+      features: "Features",
+      pricing: "Pricing",
+      testimonials: "Testimonials",
+      login: "Login",
+      cta: "Start Free Trial",
+    },
+    hero: {
+      title: "Run your shop with precision. Grow your profit with AI.",
+      desc: "Simple billing, smart inventory, and AI-powered loss prevention for small businesses.",
+      ctaPrimary: "Start Your 14-Day Free Trial",
+      ctaSecondary: "Watch Product Tour",
+      imageAlt: "Hisaab Dashboard Preview",
+    },
+    features: {
+      billingTitle: "GST-Compliant Billing",
+      billingDesc:
+        "Effortless invoicing with automated tax calculations. Generate professional bills in seconds and stay fully compliant with the latest regulations.",
+      inventoryTitle: "Smart Inventory",
+      inventoryDesc:
+        "Real-time stock alerts and intelligent loss prevention. Track every item across multiple locations and never miss a low-stock warning.",
+      bankingTitle: "Connected Banking",
+      bankingDesc:
+        "Direct bank feed integration for instant reconciliation. Match transactions automatically and keep your cash flow perfectly aligned.",
+    },
+    aiAdvantage: {
+      title: "The app that watches your shop while you sleep.",
+      desc: "Hisaab AI acts as your silent partner, continuously analyzing your data to catch what humans miss.",
+      points: [
+        {
+          title: "Catch Stock Mismatches",
+          desc: "Automatically flags discrepancies between recorded sales and physical inventory levels.",
+        },
+        {
+          title: "Detect Unusual Discounts",
+          desc: "Alerts you when staff apply out-of-policy discounts or suspicious refunds.",
+        },
+        {
+          title: "Identify High-Profit Items",
+          desc: "Highlights your most lucrative products to help optimize your shelf space and promotions.",
+        },
+      ],
+      imageAlt: "AI Insights Dashboard",
+    },
+    mobile: {
+      title: "Your business in your pocket.",
+      desc: "Bill customers on the go, check inventory from anywhere, and stay connected to your shop's heartbeat 24/7.",
+      appStoreSub: "Download on the",
+      appStoreTitle: "App Store",
+      googlePlaySub: "GET IT ON",
+      googlePlayTitle: "Google Play",
+      imageAlt: "Mobile App Preview",
+    },
+    social: {
+      title: "Trusted by over 15,000 retail shops across India.",
+      retail: "Retail Store",
+      supermarket: "Supermarket",
+      grocery: "Grocery",
+      boutique: "Boutique",
+      restaurant: "Food Joint",
+    },
+    footer: {
+      copyright: "© 2026 Hisaab AI. All rights reserved.",
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
+      contact: "Contact Us",
+      docs: "Documentation",
+    },
+    signup: {
+      title: "Start Your 14-Day Free Trial",
+      subtitle: "No credit card required. Setup in 60 seconds.",
+      nameLabel: "Full Name",
+      namePlaceholder: "Enter your full name",
+      shopLabel: "Shop Name",
+      shopPlaceholder: "e.g., Kirana Junction",
+      emailLabel: "Email Address",
+      emailPlaceholder: "you@example.com",
+      passwordLabel: "Password",
+      passwordPlaceholder: "Create a strong password",
+      submit: "Create My Free Account",
+      cancel: "Cancel",
+      errorRequired: "This field is required",
+      successTitle: "Account Created Successfully!",
+      successDesc: "Welcome to Hisaab! Redirecting you to your dashboard...",
+    },
+  },
+  hi: {
+    nav: {
+      features: "विशेषताएं",
+      pricing: "कीमतें",
+      testimonials: "प्रशंसापत्र",
+      login: "लॉगिन",
+      cta: "फ्री ट्रायल शुरू करें",
+    },
+    hero: {
+      title: "सटीकता के साथ अपनी दुकान चलाएं। AI के साथ अपना मुनाफा बढ़ाएं।",
+      desc: "छोटे व्यवसायों के लिए सरल बिलिंग, स्मार्ट इन्वेंट्री और AI-संचालित नुकसान से बचाव।",
+      ctaPrimary: "अपना 14 दिनों का फ्री ट्रायल शुरू करें",
+      ctaSecondary: "प्रोडक्ट टूर देखें",
+      imageAlt: "हिसाब डैशबोर्ड पूर्वावलोकन",
+    },
+    features: {
+      billingTitle: "GST-अनुकूल बिलिंग",
+      billingDesc:
+        "स्वचालित टैक्स गणना के साथ आसान चालान (इनवॉइस)। सेकंडों में पेशेवर बिल बनाएं और नियमों का पूर्ण पालन करें।",
+      inventoryTitle: "स्मार्ट इन्वेंट्री",
+      inventoryDesc:
+        "वास्तविक समय स्टॉक अलर्ट और बुद्धिमान नुकसान रोकथाम। कई स्थानों पर हर आइटम को ट्रैक करें और कभी भी कम स्टॉक की चेतावनी न चूकें।",
+      bankingTitle: "कनेक्टेड बैंकिंग",
+      bankingDesc:
+        "त्वरित समाधान के लिए सीधे बैंक फीड एकीकरण। लेन-देन का स्वचालित मिलान करें और अपने कैश फ्लो को हमेशा व्यवस्थित रखें।",
+    },
+    aiAdvantage: {
+      title: "वह ऐप जो आपकी नींद के दौरान भी आपकी दुकान पर नज़र रखता है।",
+      desc: "Hisaab AI आपके मूक साथी के रूप में कार्य करता है, इंसानी नजरों से छूट जाने वाली गलतियों को पकड़ने के लिए आपके डेटा का लगातार विश्लेषण करता है।",
+      points: [
+        {
+          title: "स्टॉक बेमेल को पकड़ें",
+          desc: "दर्ज की गई बिक्री और वास्तविक स्टॉक स्तरों के बीच विसंगतियों को स्वचालित रूप से चिह्नित करता है।",
+        },
+        {
+          title: "असामान्य छूट का पता लगाएं",
+          desc: "जब कर्मचारी बिना अनुमति के छूट या संदिग्ध रिफंड लागू करते हैं तो आपको तुरंत सचेत करता है।",
+        },
+        {
+          title: "उच्च-मुनाफे वाले सामानों की पहचान करें",
+          desc: "शेल्फ स्पेस और प्रचार को बेहतर बनाने में मदद के लिए आपके सबसे अधिक मुनाफे वाले उत्पादों को हाइलाइट करता है।",
+        },
+      ],
+      imageAlt: "AI अंतर्दृष्टि डैशबोर्ड",
+    },
+    mobile: {
+      title: "आपका व्यवसाय आपकी जेब में।",
+      desc: "चलते-फिरते ग्राहकों को बिल भेजें, कहीं से भी इन्वेंट्री की जांच करें, और 24/7 अपनी दुकान की गतिविधियों से जुड़े रहें।",
+      appStoreSub: "ऐप स्टोर से",
+      appStoreTitle: "डाउनलोड करें",
+      googlePlaySub: "गूगल प्ले पर",
+      googlePlayTitle: "प्राप्त करें",
+      imageAlt: "मोबाइल ऐप पूर्वावलोकन",
+    },
+    social: {
+      title: "भारत भर में 15,000 से अधिक रिटेल दुकानों द्वारा भरोसेमंद।",
+      retail: "रिटेल दुकान",
+      supermarket: "सुपरमार्केट",
+      grocery: "किराना दुकान",
+      boutique: "बुटीक",
+      restaurant: "रेस्टोरेंट/ढाबा",
+    },
+    footer: {
+      copyright: "© 2026 Hisaab AI. सभी अधिकार सुरक्षित।",
+      privacy: "गोपनीयता नीति",
+      terms: "सेवा की शर्तें",
+      contact: "संपर्क करें",
+      docs: "दस्तावेज़ीकरण",
+    },
+    signup: {
+      title: "अपना 14-दिन का फ्री ट्रायल शुरू करें",
+      subtitle: "कोई क्रेडिट कार्ड आवश्यक नहीं। 60 सेकंड में शुरू करें।",
+      nameLabel: "पूरा नाम",
+      namePlaceholder: "अपना पूरा नाम दर्ज करें",
+      shopLabel: "दुकान का नाम",
+      shopPlaceholder: "उदा. किराना जंक्शन",
+      emailLabel: "ईमेल पता",
+      emailPlaceholder: "you@example.com",
+      passwordLabel: "पासवर्ड",
+      passwordPlaceholder: "एक मजबूत पासवर्ड बनाएं",
+      submit: "मेरा फ्री अकाउंट बनाएं",
+      cancel: "रद्द करें",
+      errorRequired: "यह फ़ील्ड आवश्यक है",
+      successTitle: "खाता सफलतापूर्वक बनाया गया!",
+      successDesc: "हिसाब (Hisaab) में आपका स्वागत है! आपको डैशबोर्ड पर भेजा जा रहा है...",
+    },
+  },
+};
