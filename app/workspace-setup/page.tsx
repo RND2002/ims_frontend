@@ -75,9 +75,6 @@ export default function WorkspaceSetupPage() {
           <span className="font-serif text-2xl font-extrabold text-brand tracking-tight">
             Hisaab
           </span>
-          <span className="bg-brand-light text-brand text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wide">
-            v2
-          </span>
         </div>
 
         {/* Quick Add Store button */}
@@ -212,7 +209,7 @@ export default function WorkspaceSetupPage() {
           // Refresh page / redirect after done
           dispatch(fetchStores()).then((res: any) => {
             if (res.payload && res.payload.length > 0) {
-              router.push(`/${res.payload[0].id}`);
+              router.push(`/store/${res.payload[0].id}`);
             }
           });
         }}
@@ -220,7 +217,7 @@ export default function WorkspaceSetupPage() {
           setIsInviteOpen(false);
           dispatch(fetchStores()).then((res: any) => {
             if (res.payload && res.payload.length > 0) {
-              router.push(`/${res.payload[0].id}`);
+              router.push(`/store/${res.payload[0].id}`);
             }
           });
         }}

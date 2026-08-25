@@ -7,10 +7,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormData } from "@/lib/schemas/auth";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { loginUser } from "@/lib/features/auth/authSlice";
+import { sendOtp, verifyOtp } from "@/lib/features/auth/authSlice";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { OtpInput } from "@/components/auth/OtpInput";
-import { PasswordField } from "@/components/auth/PasswordField";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -20,14 +19,13 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
 
-  // Steps: 1 = Phone, 2 = OTP + Password
+  // Steps: 1 = Phone, 2 = OTP Input
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const [rememberDevice, setRememberDevice] = useState(false);
 
-  // React Hook Form for full login validation
+  // React Hook Form for phone validation
   const {
     register,
     handleSubmit,
@@ -38,7 +36,6 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       phone: "",
-      password: "",
     },
   });
 
@@ -55,8 +52,15 @@ export default function LoginPage() {
     // Validate phone input using Zod before advancing
     const isPhoneValid = await trigger("phone");
     if (isPhoneValid) {
-      setStep(2);
-      setCountdown(30);
+      try {
+        const phoneVal = getValues("phone");
+        await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+        setStep(2);
+        setCountdown(30);
+        setOtpError(false);
+      } catch (err) {
+        console.error("Failed to send OTP:", err);
+      }
     }
   };
 
@@ -67,16 +71,32 @@ export default function LoginPage() {
     }
 
     try {
-      await dispatch(
-        loginUser({
+      const res = await dispatch(
+        verifyOtp({
           phone: "+91" + data.phone,
-          password: data.password,
+          otp: otp,
         })
       ).unwrap();
 
-      router.push("/dashboard");
+      if (res.status === "login_success") {
+        router.push("/dashboard");
+      } else if (res.status === "requires_onboarding") {
+        router.push(`/signup?phone=${data.phone}`);
+      }
     } catch (err) {
-      console.error("Login failed:", err);
+      console.error("Login verification failed:", err);
+      setOtpError(true);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const phoneVal = getValues("phone");
+      await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+      setCountdown(30);
+      setOtpError(false);
+    } catch (err) {
+      console.error("Failed to resend OTP:", err);
     }
   };
 
@@ -104,6 +124,12 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={handlePhoneSubmit} noValidate className="mt-8 flex flex-col gap-6 font-sans">
+                {error && (
+                  <div className="rounded-lg bg-danger-bg p-3 border border-danger-text/20">
+                    <p className="text-xs font-semibold text-danger-text">{error}</p>
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-1.5 font-sans">
                   <label className="text-[12px] font-semibold text-text-secondary leading-none">
                     Mobile Number
@@ -135,8 +161,9 @@ export default function LoginPage() {
                   variant="cta"
                   size="xl"
                   className="w-full"
+                  disabled={loading}
                 >
-                  Send OTP
+                  {loading ? "Sending OTP..." : "Send OTP"}
                 </Button>
               </form>
             </div>
@@ -146,7 +173,7 @@ export default function LoginPage() {
             <div>
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold tracking-tight text-text-primary font-sans">
-                  Verify &amp; Enter Password
+                  Verify OTP
                 </h1>
                 <p className="mt-1.5 text-sm text-text-secondary font-sans">
                   Enter OTP sent to <span className="font-semibold text-text-primary">+91 {getValues("phone")}</span>
@@ -176,34 +203,12 @@ export default function LoginPage() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setCountdown(30)}
+                      onClick={handleResendOtp}
                       className="font-semibold text-brand hover:text-brand-dark transition-colors cursor-pointer"
                     >
                       Resend OTP
                     </button>
                   )}
-                </div>
-
-                {/* Password field */}
-                <PasswordField
-                  label="Account Password"
-                  placeholder="Enter password"
-                  error={errors.password?.message}
-                  register={register("password")}
-                />
-
-                {/* Remember me checkbox */}
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    checked={rememberDevice}
-                    onChange={(e) => setRememberDevice(e.target.checked)}
-                    className="h-4 w-4 rounded border-border-default text-brand focus:ring-brand"
-                  />
-                  <label htmlFor="remember" className="text-xs font-semibold text-text-secondary select-none cursor-pointer">
-                    Remember this device
-                  </label>
                 </div>
 
                 <Button

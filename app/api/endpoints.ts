@@ -7,6 +7,9 @@ export const API_ENDPOINTS = {
     login: "/api/auth/login",
     refresh: "/api/auth/refresh",
     logout: "/api/auth/logout",
+    otpSend: "/api/auth/otp/send",
+    otpVerify: "/api/auth/otp/verify",
+    otpRegister: "/api/auth/otp/register",
   },
   
   // Direct FastAPI Backend Routes (organized by resource prefix)
@@ -16,6 +19,9 @@ export const API_ENDPOINTS = {
       token: `${BACKEND_URL}/api/v1/auth/token`,
       refresh: `${BACKEND_URL}/api/v1/auth/refresh`,
       activate: `${BACKEND_URL}/api/v1/auth/activate`,
+      otpSend: `${BACKEND_URL}/api/v1/auth/otp/send`,
+      otpVerify: `${BACKEND_URL}/api/v1/auth/otp/verify`,
+      otpRegister: `${BACKEND_URL}/api/v1/auth/otp/register`,
     },
     stores: {
       base: `${BACKEND_URL}/api/v1/stores`,

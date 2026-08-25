@@ -18,4 +18,6 @@ export interface AuthState {
   accessToken: string | null;
   loading: boolean;
   error: string | null;
+  activePhone: string | null;
+  authStatus: "idle" | "otp_sent" | "login_success" | "requires_onboarding" | "authenticated" | null;
 }

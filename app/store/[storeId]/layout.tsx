@@ -177,19 +177,10 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
           <span className="font-serif text-2xl font-extrabold text-brand tracking-tight">
             Hisaab
           </span>
-          <span className="bg-brand-light text-brand text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wide">
-            v2
-          </span>
-          <span className="text-[10px] text-red-500 font-bold ml-2">Role: {resolvedRole}</span>
         </div>
 
         {/* Workspace Switcher */}
         <WorkspaceSwitcher onCreateStoreClick={() => setIsCreateStoreOpen(true)} />
-
-        {/* Temporary Debug Info */}
-        <div className="text-[10px] text-red-500 font-mono p-2 bg-red-50 rounded-lg select-text">
-          role={resolvedRole} stores={stores.length} members={members.length}
-        </div>
 
         {/* Quick Add Store button */}
         <Button
