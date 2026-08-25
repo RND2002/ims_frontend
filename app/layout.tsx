@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { StoreProvider } from "@/app/StoreProvider";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -25,14 +26,16 @@ export const metadata: Metadata = {
   description: "Simple billing, smart inventory, and AI-powered loss prevention for small businesses.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       className={`${lora.variable} ${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <LanguageProvider>{children}</LanguageProvider>
+        <StoreProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </StoreProvider>
       </body>
     </html>
   );

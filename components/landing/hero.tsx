@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Play } from "lucide-react";
 
-export function Hero({ onStartTrial }: { onStartTrial: () => void }) {
+export function Hero() {
   const { t } = useLanguage();
 
   return (
@@ -19,14 +20,15 @@ export function Hero({ onStartTrial }: { onStartTrial: () => void }) {
             {t("hero.desc")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-2">
-            <Button
-              variant="default"
-              size="lg"
-              onClick={onStartTrial}
-              className="bg-cta hover:bg-cta-dark text-white rounded-lg px-6 py-6 text-base font-semibold transition-all w-full sm:w-auto"
-            >
-              {t("hero.ctaPrimary")}
-            </Button>
+            <Link href="/signup" className="w-full sm:w-auto">
+              <Button
+                variant="default"
+                size="lg"
+                className="bg-cta hover:bg-cta-dark text-white rounded-lg px-6 py-6 text-base font-semibold transition-all w-full cursor-pointer"
+              >
+                {t("hero.ctaPrimary")}
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Languages, Menu, X } from "lucide-react";
 
-export function NavBar({ onStartTrial }: { onStartTrial: () => void }) {
+export function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
 
@@ -56,18 +56,22 @@ export function NavBar({ onStartTrial }: { onStartTrial: () => void }) {
             {language === "en" ? "हिन्दी" : "English"}
           </button>
 
-          <button className="hidden md:block px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand transition-colors">
-            {t("nav.login")}
-          </button>
-
-          <Button
-            variant="default"
-            size="lg"
-            onClick={onStartTrial}
-            className="rounded-lg bg-cta hover:bg-cta-dark text-white px-4 py-2 text-sm font-medium transition-colors"
+          <Link
+            href="/login"
+            className="hidden md:block px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand transition-colors"
           >
-            {t("nav.cta")}
-          </Button>
+            {t("nav.login")}
+          </Link>
+
+          <Link href="/signup">
+            <Button
+              variant="default"
+              size="lg"
+              className="rounded-lg bg-cta hover:bg-cta-dark text-white px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+            >
+              {t("nav.cta")}
+            </Button>
+          </Link>
 
           {/* Mobile Menu Button */}
           <button

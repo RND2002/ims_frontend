@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="30" x2="840" y2="490" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F7FF"/>
+      <stop offset="1" stop-color="#EEEAFE"/>
+    </linearGradient>
+    <linearGradient id="card" x1="260" y1="100" x2="760" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FAFAFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#25235A" flood-opacity=".12"/>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="520" rx="28" fill="url(#bg)"/>
+  <circle cx="112" cy="88" r="70" fill="#6C63FF" opacity=".08" filter="url(#soft)"/>
+  <circle cx="805" cy="438" r="100" fill="#FF6B5E" opacity=".08" filter="url(#soft)"/>
+
+  <!-- Store illustration -->
+  <g transform="translate(55 82)">
+    <rect x="0" y="80" width="235" height="285" rx="14" fill="#FFFFFF" stroke="#DCDDF0" stroke-width="2"/>
+    <rect x="14" y="101" width="207" height="150" rx="8" fill="#F6F6FB"/>
+
+    <!-- awning -->
+    <rect x="8" y="50" width="219" height="58" rx="9" fill="#5A52E8"/>
+    <path d="M8 72h219v28c-13 0-13-18-27-18s-14 18-28 18-14-18-28-18-14 18-28 18-14-18-28-18-14 18-28 18-14-18-28-18-14 18-28 18-14-18-27-18-14 18-27 18V72Z" fill="#FFFFFF" opacity=".92"/>
+
+    <!-- sign -->
+    <rect x="55" y="0" width="125" height="62" rx="10" fill="#FFFFFF" stroke="#D7D7EA" stroke-width="2"/>
+    <text x="117.5" y="29" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#26234F">Hisaab</text>
+    <text x="117.5" y="47" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#77758C">SMART INVENTORY</text>
+
+    <!-- shelves -->
+    <rect x="30" y="130" width="160" height="8" rx="4" fill="#D7D8E7"/>
+    <rect x="30" y="190" width="160" height="8" rx="4" fill="#D7D8E7"/>
+    <rect x="42" y="110" width="28" height="22" rx="4" fill="#FFB86B"/>
+    <rect x="79" y="112" width="32" height="20" rx="4" fill="#7E9BFF"/>
+    <rect x="121" y="108" width="26" height="24" rx="4" fill="#7BCFA7"/>
+    <rect x="156" y="112" width="22" height="20" rx="4" fill="#FF8074"/>
+    <rect x="45" y="168" width="35" height="22" rx="4" fill="#8AA4FF"/>
+    <rect x="91" y="164" width="27" height="26" rx="4" fill="#FFB86B"/>
+    <rect x="128" y="167" width="39" height="23" rx="4" fill="#78C9A2"/>
+
+    <!-- counter -->
+    <rect x="20" y="254" width="195" height="16" rx="5" fill="#6B63D9"/>
+    <rect x="29" y="270" width="177" height="75" rx="7" fill="#ECECFA"/>
+    <rect x="53" y="284" width="67" height="39" rx="5" fill="#FFFFFF"/>
+    <rect x="132" y="284" width="48" height="8" rx="4" fill="#C6C7DD"/>
+    <rect x="132" y="301" width="36" height="8" rx="4" fill="#C6C7DD"/>
+
+    <!-- trust badge -->
+    <circle cx="222" cy="315" r="38" fill="#FFFFFF" stroke="#D8D8EB" stroke-width="2"/>
+    <path d="M222 291l20 8v15c0 14-9 24-20 29-11-5-20-15-20-29v-15l20-8Z" fill="#6C63FF" opacity=".15"/>
+    <path d="M211 313l7 7 15-16" stroke="#5A52E8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Main dashboard card -->
+  <g filter="url(#shadow)">
+    <rect x="300" y="48" width="545" height="405" rx="24" fill="url(#card)" stroke="#E2E2F0" stroke-width="2"/>
+  </g>
+
+  <!-- dashboard header -->
+  <circle cx="334" cy="83" r="17" fill="#EEEFFF"/>
+  <path d="M326 83h16M334 75v16" stroke="#5A52E8" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="365" y="88" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#26234F">Your store is in good hands</text>
+  <circle cx="805" cy="82" r="7" fill="#48B98B"/>
+  <text x="718" y="87" font-family="Arial, sans-serif" font-size="11" fill="#6C6B7C">All systems operational</text>
+
+  <!-- stats -->
+  <rect x="327" y="119" width="158" height="91" rx="14" fill="#F7F7FD"/>
+  <text x="345" y="145" font-family="Arial, sans-serif" font-size="11" fill="#77758B">INVENTORY TRACKED</text>
+  <text x="345" y="177" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#26234F">1,284</text>
+  <text x="345" y="196" font-family="Arial, sans-serif" font-size="10" fill="#48A57F">+12.4% this month</text>
+
+  <rect x="500" y="119" width="158" height="91" rx="14" fill="#F7F7FD"/>
+  <text x="518" y="145" font-family="Arial, sans-serif" font-size="11" fill="#77758B">LOW STOCK ITEMS</text>
+  <text x="518" y="177" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#26234F">18</text>
+  <text x="518" y="196" font-family="Arial, sans-serif" font-size="10" fill="#E36D60">Needs attention</text>
+
+  <rect x="673" y="119" width="158" height="91" rx="14" fill="#F7F7FD"/>
+  <text x="691" y="145" font-family="Arial, sans-serif" font-size="11" fill="#77758B">MONTHLY SALES</text>
+  <text x="691" y="177" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#26234F">₹4.82L</text>
+  <text x="691" y="196" font-family="Arial, sans-serif" font-size="10" fill="#48A57F">+8.7% this month</text>
+
+  <!-- chart -->
+  <rect x="327" y="230" width="331" height="186" rx="14" fill="#FFFFFF" stroke="#E9E9F2"/>
+  <text x="345" y="256" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#26234F">Sales overview</text>
+  <text x="585" y="256" font-family="Arial, sans-serif" font-size="10" fill="#8A8899">Last 6 months</text>
+  <path d="M350 376H635M350 338H635M350 300H635" stroke="#EEEEF5" stroke-width="1"/>
+  <path d="M350 366C386 351 401 359 430 335S476 322 500 338s42-11 61-34 45-3 74-29" stroke="#6259E8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M350 366C386 351 401 359 430 335S476 322 500 338s42-11 61-34 45-3 74-29V382H350Z" fill="#6259E8" opacity=".08"/>
+  <circle cx="635" cy="275" r="5" fill="#6259E8"/>
+
+  <!-- trust/security panel -->
+  <rect x="673" y="230" width="158" height="186" rx="14" fill="#F2F1FF"/>
+  <circle cx="752" cy="275" r="30" fill="#FFFFFF"/>
+  <path d="M752 252l19 7v14c0 14-8 25-19 30-11-5-19-16-19-30v-14l19-7Z" fill="#6259E8" opacity=".15"/>
+  <path d="M741 273l7 7 15-16" stroke="#5A52E8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="752" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#302D61">Secure &amp; private</text>
+  <text x="752" y="342" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#706E87">Your business data</text>
+  <text x="752" y="357" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#706E87">stays protected</text>
+  <rect x="700" y="376" width="104" height="22" rx="11" fill="#FFFFFF"/>
+  <circle cx="716" cy="387" r="4" fill="#48B98B"/>
+  <text x="726" y="391" font-family="Arial, sans-serif" font-size="9" fill="#56546B">Encrypted</text>
+
+  <!-- floating positive signal -->
+  <g filter="url(#shadow)">
+    <rect x="565" y="418" width="215" height="58" rx="16" fill="#FFFFFF"/>
+    <circle cx="594" cy="447" r="18" fill="#EAF8F2"/>
+    <path d="M585 447l6 6 11-12" stroke="#48A57F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="622" y="443" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#26234F">Everything looks good</text>
+    <text x="622" y="459" font-family="Arial, sans-serif" font-size="10" fill="#77758B">Inventory is up to date</text>
+  </g>
+
+  <!-- small decorative spark -->
+  <path d="M775 33l4 10 10 4-10 4-4 10-4-10-10-4 10-4 4-10Z" fill="#FFB44E"/>
+  <path d="M278 420l3 8 8 3-8 3-3 8-3-8-8-3 8-3 3-8Z" fill="#6259E8" opacity=".65"/>
+</svg>

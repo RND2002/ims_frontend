@@ -21,7 +21,7 @@
   --color-border-strong: #C7C7E0;
 
   --color-text-primary: #151328;
-  --color-text-secondary: #65637D;
+  --color-text-secondary: #3C3B54;
   --color-text-on-dark: #FFFFFF;
   --color-text-on-dark-muted: #9694B8;
 
@@ -94,7 +94,7 @@
   --secondary: #EEF2FF;
   --secondary-foreground: #3730A3;
   --muted: #F7F7FB;
-  --muted-foreground: #65637D;
+  --muted-foreground: #3C3B54;
   --accent: #EEF2FF;
   --accent-foreground: #4338CA;
   --destructive: #DC2626;
@@ -105,7 +105,7 @@
   --chart-1: #4338CA;
   --chart-2: #3730A3;
   --chart-3: #EEF2FF;
-  --chart-4: #65637D;
+  --chart-4: #3C3B54;
   --chart-5: #151328;
   --radius: 0.625rem;
   --sidebar: #181535;
