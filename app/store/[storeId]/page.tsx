@@ -18,6 +18,7 @@ import {
   AlertCircle,
   HelpCircle,
   Percent,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +43,7 @@ export default function StoreDashboardPage() {
       try {
         const client = createApiClient(store.getState);
         const data = await client.get<any>(API_ENDPOINTS.backend.dashboard.summary);
-        
+
         // Safe sanitization of 90-character decimal strings into normal floats
         setSummary({
           total_sales: data.total_sales ? Number(data.total_sales) : 0,
@@ -54,25 +55,25 @@ export default function StoreDashboardPage() {
           total_payables: data.total_payables ? Number(data.total_payables) : 0,
           weekly_sales: Array.isArray(data.weekly_sales)
             ? data.weekly_sales.map((ws: any) => ({
-                date: ws.date,
-                sales: ws.sales ? Number(ws.sales) : 0,
-              }))
+              date: ws.date,
+              sales: ws.sales ? Number(ws.sales) : 0,
+            }))
             : [],
           top_products: Array.isArray(data.top_products)
             ? data.top_products.map((tp: any) => ({
-                product_id: tp.product_id,
-                product_name: tp.product_name || "Unknown Product",
-                quantity_sold: tp.quantity_sold ? Number(tp.quantity_sold) : 0,
-                revenue: tp.revenue ? Number(tp.revenue) : 0,
-              }))
+              product_id: tp.product_id,
+              product_name: tp.product_name || "Unknown Product",
+              quantity_sold: tp.quantity_sold ? Number(tp.quantity_sold) : 0,
+              revenue: tp.revenue ? Number(tp.revenue) : 0,
+            }))
             : [],
           top_debtors: Array.isArray(data.top_debtors)
             ? data.top_debtors.map((td: any) => ({
-                party_id: td.party_id,
-                party_name: td.party_name || "Unknown Debtor",
-                balance: td.balance ? Number(td.balance) : 0,
-                phone: td.phone || "",
-              }))
+              party_id: td.party_id,
+              party_name: td.party_name || "Unknown Debtor",
+              balance: td.balance ? Number(td.balance) : 0,
+              phone: td.phone || "",
+            }))
             : [],
         });
       } catch (err) {
@@ -104,8 +105,8 @@ export default function StoreDashboardPage() {
   }
 
   // Calculate gross margin %
-  const grossMargin = summary.total_sales > 0 
-    ? ((summary.total_sales - summary.cogs) / summary.total_sales) * 100 
+  const grossMargin = summary.total_sales > 0
+    ? ((summary.total_sales - summary.cogs) / summary.total_sales) * 100
     : 0;
 
   // Custom SVG Sparkline Calculation
@@ -114,7 +115,7 @@ export default function StoreDashboardPage() {
     const paddingBottom = 20;
     const points = summary.weekly_sales;
     if (points.length === 0) return { linePath: "", areaPath: "", coordinates: [], maxVal: 1000, height, paddingBottom };
-    
+
     const maxVal = Math.max(...points.map((p: any) => p.sales), 1000);
     const width = 500;
     const paddingLeft = 40;
@@ -136,8 +137,8 @@ export default function StoreDashboardPage() {
       ""
     );
 
-    const areaPath = coordinates.length > 0 
-      ? `${linePath} L ${coordinates[coordinates.length - 1].x} ${height - paddingBottom} L ${coordinates[0].x} ${height - paddingBottom} Z` 
+    const areaPath = coordinates.length > 0
+      ? `${linePath} L ${coordinates[coordinates.length - 1].x} ${height - paddingBottom} L ${coordinates[0].x} ${height - paddingBottom} Z`
       : "";
 
     return { linePath, areaPath, coordinates, maxVal, height, paddingBottom };
@@ -147,17 +148,16 @@ export default function StoreDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 font-sans">
-      
+
       {/* Top Welcome Titlebar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl lg:text-2xl font-extrabold text-[#151328] tracking-tight">
-            {language === "hi" ? "डैशबोर्ड" : "Dashboard"}
+            {t("dashboard.title")}
           </h1>
           <p className="mt-0.5 text-xs font-semibold text-[#65637D] flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping inline-block" />
             {t("dashboard.todayAt")} <span className="font-bold text-[#151328]">{storeName}</span> —
-            <span className="text-slate-400 font-medium">Updated just now</span>
           </p>
         </div>
 
@@ -174,6 +174,14 @@ export default function StoreDashboardPage() {
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             {t("dashboard.quickActionRecordSale")}
+          </Link>
+
+          <Link
+            href={`/store/${storeId}/purchases/import`}
+            className="h-9.5 px-4 bg-[#4338CA] hover:bg-[#372f9f] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            {language === "hi" ? "खरीद इम्पोर्ट / Import Purchase" : "Import Purchase"}
           </Link>
         </div>
       </div>
@@ -227,7 +235,7 @@ export default function StoreDashboardPage() {
 
       {/* SECTION 2: Key Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
+
         {/* Total Purchases */}
         <div className="bg-white rounded-xl border border-[#E4E4F0] p-4.5 shadow-sm flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -311,7 +319,7 @@ export default function StoreDashboardPage() {
 
       {/* SECTION 3 & 4: Sales chart + Debtors Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Sales trend chart (60% width) */}
         <div className="bg-white rounded-xl border border-[#E4E4F0] p-5 shadow-sm lg:col-span-2 flex flex-col justify-between">
           <div className="flex items-center justify-between border-b pb-3 mb-4">
@@ -360,8 +368,8 @@ export default function StoreDashboardPage() {
                 ))}
 
                 {/* Y-axis labels */}
-                <text x="5" y="25" fill="#98A2B3" className="text-[9px] font-semibold font-mono">₹{maxVal >= 1000 ? `${(maxVal/1000).toFixed(0)}k` : maxVal}</text>
-                <text x="5" y="78" fill="#98A2B3" className="text-[9px] font-semibold font-mono">₹{maxVal >= 1000 ? `${(maxVal/2000).toFixed(0)}k` : (maxVal/2).toFixed(0)}</text>
+                <text x="5" y="25" fill="#98A2B3" className="text-[9px] font-semibold font-mono">₹{maxVal >= 1000 ? `${(maxVal / 1000).toFixed(0)}k` : maxVal}</text>
+                <text x="5" y="78" fill="#98A2B3" className="text-[9px] font-semibold font-mono">₹{maxVal >= 1000 ? `${(maxVal / 2000).toFixed(0)}k` : (maxVal / 2).toFixed(0)}</text>
                 <text x="5" y="132" fill="#98A2B3" className="text-[9px] font-semibold font-mono">₹0</text>
 
                 {activeChartType === "line" ? (
@@ -510,7 +518,7 @@ export default function StoreDashboardPage() {
                 {summary.top_products.map((prod: any, idx: number) => {
                   const maxRevenue = Math.max(...summary.top_products.map((p: any) => p.revenue), 1);
                   const contributionPercent = (prod.revenue / maxRevenue) * 100;
-                  
+
                   return (
                     <tr key={idx} className="group hover:bg-[#F7F7FB] transition-colors">
                       <td className="py-3 font-bold text-[#151328]">{prod.product_name}</td>

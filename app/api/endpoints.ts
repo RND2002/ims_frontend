@@ -73,6 +73,15 @@ export const API_ENDPOINTS = {
     notifications: {
       base: `${BACKEND_URL}/api/v1/notifications`,
       read: (notificationId: string) => `${BACKEND_URL}/api/v1/notifications/${notificationId}/read`,
+    },
+    imports: {
+      upload: `${BACKEND_URL}/api/v1/imports/upload`,
+      batches: `${BACKEND_URL}/api/v1/imports/batches`,
+      batchById: (id: string) => `${BACKEND_URL}/api/v1/imports/batches/${id}`,
+      review: (id: string) => `${BACKEND_URL}/api/v1/imports/batches/${id}/review`,
+      commit: (id: string) => `${BACKEND_URL}/api/v1/imports/batches/${id}/commit`,
+      discard: (id: string) => `${BACKEND_URL}/api/v1/imports/batches/${id}/discard`,
+      reMatch: (lineId: string) => `${BACKEND_URL}/api/v1/imports/lines/${lineId}/re-match`,
     }
   }
 };

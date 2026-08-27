@@ -11,12 +11,13 @@ interface AddContactDialogProps {
   isOpen: boolean;
   onClose: () => void;
   partyType: "customer" | "supplier";
-  onSuccess: () => void;
+  onSuccess: (party?: any) => void;
+  initialName?: string;
 }
 
-export function AddContactDialog({ isOpen, onClose, partyType, onSuccess }: AddContactDialogProps) {
+export function AddContactDialog({ isOpen, onClose, partyType, onSuccess, initialName = "" }: AddContactDialogProps) {
   const { t } = useLanguage();
-  const [newName, setNewName] = useState("");
+  const [newName, setNewName] = useState(initialName);
   const [newPhone, setNewPhone] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const [newOpeningBalance, setNewOpeningBalance] = useState("0");
@@ -35,7 +36,7 @@ export function AddContactDialog({ isOpen, onClose, partyType, onSuccess }: AddC
     setErrorMsg(null);
     try {
       const client = createApiClient(store.getState);
-      await client.post(API_ENDPOINTS.backend.parties.base, {
+      const data = await client.post(API_ENDPOINTS.backend.parties.base, {
         name: newName,
         phone: newPhone,
         party_type: partyType,
@@ -47,7 +48,7 @@ export function AddContactDialog({ isOpen, onClose, partyType, onSuccess }: AddC
       setNewPhone("");
       setNewAddress("");
       setNewOpeningBalance("0");
-      onSuccess();
+      onSuccess(data);
       onClose();
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to save contact");

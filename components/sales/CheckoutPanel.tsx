@@ -219,12 +219,24 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
     return (response.items || []).map((prod: any) => {
       const batches = Array.isArray(prod.batches) ? prod.batches : [];
       const stock = batches.reduce((sum: number, b: any) => sum + Number(b.quantity || 0), 0);
-      const stockLabel = stock === 0 ? "Out of Stock" : `${stock} left`;
+      const matchedUnit = units.find((u) => u.id === prod.unit_id);
+      const unitSymbol = prod.unit?.symbol || matchedUnit?.symbol || "";
+
+      const stockLabel = stock === 0 
+        ? "Out of Stock" 
+        : unitSymbol 
+          ? `${stock} ${unitSymbol} left` 
+          : `${stock} left`;
+
+      const priceDisplay = unitSymbol 
+        ? `₹${Number(prod.selling_price).toFixed(2)} / ${unitSymbol}` 
+        : `₹${Number(prod.selling_price).toFixed(2)}`;
+
       return {
         value: prod.id,
         label: prod.name,
         sublabel: prod.sku ? `SKU: ${prod.sku}` : undefined,
-        badge: `₹${Number(prod.selling_price).toFixed(2)}  •  ${stockLabel}`,
+        badge: `${priceDisplay}  •  ${stockLabel}`,
         meta: { ...prod, current_stock: stock, selling_price: Number(prod.selling_price), cost_price: Number(prod.cost_price) },
       } satisfies AsyncOption;
     });
