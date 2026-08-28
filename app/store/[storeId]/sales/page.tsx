@@ -9,6 +9,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Sale } from "@/lib/types/sales";
 import { Search, ShoppingBag, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function SalesPage() {
   const { t } = useLanguage();
@@ -154,10 +155,33 @@ export default function SalesPage() {
     },
   ];
 
+  const hasNoSales = total === 0 && !searchQuery && !statusFilter;
+
   return (
     <div className="flex flex-col h-full font-sans select-none w-full min-w-0">
-      
-      {/* Top Banner Toolbar */}
+      {hasNoSales && !loading ? (
+        <div className="flex flex-col gap-5">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-extrabold text-[#151328] tracking-tight">
+              {t("sales.title")}
+            </h1>
+            <p className="mt-1 text-xs text-[#65637D] font-semibold">
+              {t("sales.subtitle").replace("{total}", String(total))}
+            </p>
+          </div>
+          <div className="border border-[#E4E4F0] rounded-xl bg-white mt-1">
+            <EmptyState
+              icon={ShoppingBag}
+              title={t("sales.noSalesYet")}
+              description={t("sales.noSalesYetDesc")}
+              actionText={t("sales.recordSale")}
+              onAction={() => setIsCheckoutOpen(true)}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Top Banner Toolbar */}
       <div className="bg-white px-6 py-4.5 rounded-t-xl border border-[#E4E4F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-lg font-bold text-[#151328] flex items-center gap-2">
@@ -209,17 +233,19 @@ export default function SalesPage() {
         </div>
       </div>
 
-      {/* Reusable DataTable Grid */}
-      <DataTable
-        columns={columns}
-        data={sales}
-        loading={loading}
-        total={total}
-        limit={limit}
-        offset={offset}
-        onPageChange={handlePageChange}
-        showingText={t("sales.showing")}
-      />
+          {/* Reusable DataTable Grid */}
+          <DataTable
+            columns={columns}
+            data={sales}
+            loading={loading}
+            total={total}
+            limit={limit}
+            offset={offset}
+            onPageChange={handlePageChange}
+            showingText={t("sales.showing")}
+          />
+        </>
+      )}
 
       {/* POS Checkout Panel */}
       <CheckoutPanel isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />

@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ManualPurchasePanel } from "@/components/purchases/ManualPurchasePanel";
 import { BatchDetailPanel } from "@/components/purchases/BatchDetailPanel";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function PurchasesImportsListPage() {
   const params = useParams();
@@ -173,22 +174,14 @@ export default function PurchasesImportsListPage() {
           ))}
         </div>
       ) : batches.length === 0 ? (
-        <div className="bg-white border border-[#E4E4F0] rounded-xl p-12 text-center max-w-xl mx-auto mt-6">
-          <div className="h-14 w-14 rounded-full bg-[#EEF2FF] border border-[#C7C7E0] flex items-center justify-center mx-auto text-[#4338CA] mb-4">
-            <FileText className="h-6 w-6" />
-          </div>
-          <h3 className="text-sm font-extrabold text-[#151328] mb-1.5">
-            {t("imports.list.emptyTitle")}
-          </h3>
-          <p className="text-xs text-[#65637D] font-medium leading-relaxed max-w-sm mx-auto mb-6">
-            {t("imports.list.emptySubtitle")}
-          </p>
-          <Button
-            onClick={() => router.push(`/store/${storeId}/purchases/import`)}
-            className="bg-[#4338CA] hover:bg-[#372f9f] text-white text-xs font-bold px-5 py-5 rounded-lg"
-          >
-            {t("imports.list.uploadFirstButton")}
-          </Button>
+        <div className="border border-[#E4E4F0] rounded-xl bg-white mt-6">
+          <EmptyState
+            icon={FileText}
+            title={t("imports.list.emptyTitle")}
+            description={t("imports.list.emptySubtitle")}
+            actionText={t("imports.list.uploadFirstButton")}
+            onAction={() => router.push(`/store/${storeId}/purchases/import`)}
+          />
         </div>
       ) : (
         <div className="space-y-4">

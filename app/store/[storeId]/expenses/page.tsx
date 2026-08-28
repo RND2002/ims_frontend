@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function ExpensesPage() {
   const { t } = useLanguage();
@@ -285,28 +286,24 @@ export default function ExpensesPage() {
         </div>
 
         {/* Data list view */}
-        <div className="bg-white rounded-b-xl border border-[#E4E4F0] border-t-0 flex flex-col">
-          {loading ? (
-            <div className="py-16 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-brand" />
-            </div>
-          ) : expenses.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center px-4">
-              <AlertCircle className="h-10 w-10 text-slate-300 mb-2" />
-              <h3 className="text-sm font-bold text-[#151328]">No expenses recorded</h3>
-              <p className="text-[11px] text-[#65637D] mt-1">Click "Add Expense" to register your first operational expense.</p>
-            </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={expenses}
-              total={totalCount}
-              limit={limit}
-              offset={offset}
-              onPageChange={setOffset}
+        <DataTable
+          columns={columns}
+          data={expenses}
+          loading={loading}
+          total={totalCount}
+          limit={limit}
+          offset={offset}
+          onPageChange={setOffset}
+          emptyState={
+            <EmptyState
+              icon={TrendingUp}
+              title="No expenses recorded"
+              description="Record your first operational expense to start tracking store spending."
+              actionText="Record Expense"
+              onAction={() => setIsAddModalOpen(true)}
             />
-          )}
-        </div>
+          }
+        />
       </div>
 
       {/* Add Expense Popup Dialog */}

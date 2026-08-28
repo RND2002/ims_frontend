@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ReactNode } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,6 +30,9 @@ interface DataTableProps<TData, TValue> {
   // Row selection
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: (selection: Record<string, boolean>) => void;
+  
+  // Custom Empty State
+  emptyState?: ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -42,6 +46,7 @@ export function DataTable<TData, TValue>({
   showingText = "Showing {start}-{end} of {total} items",
   rowSelection = {},
   onRowSelectionChange,
+  emptyState,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -139,8 +144,12 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-8 text-center text-sm text-[#65637D] font-bold">
-                No data available
+              <td colSpan={columns.length} className="px-4 py-8">
+                {emptyState || (
+                  <div className="text-center text-sm text-[#65637D] font-bold py-8">
+                    No data available
+                  </div>
+                )}
               </td>
             </tr>
           )}

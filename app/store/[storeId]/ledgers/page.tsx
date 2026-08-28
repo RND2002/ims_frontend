@@ -7,6 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Party, LedgerEntry, LedgerStatement } from "@/lib/types/sales";
 import { Search, UserPlus, IndianRupee, ArrowDownLeft, ArrowUpRight, BookOpen, X, Loader2, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 import { AddContactDialog } from "@/components/ledgers/AddContactDialog";
 import { RecordPaymentDialog } from "@/components/ledgers/RecordPaymentDialog";
 import {
@@ -57,6 +58,7 @@ export default function LedgersPage() {
 
   const parties = data?.items || [];
   const total = data?.total || 0;
+  const hasNoParties = total === 0 && !searchQuery;
 
   // RTK Query lazy query for fetching specific customer statement on open
   const [triggerGetStatement, { data: statement, isFetching: statementLoading }] = useLazyGetLedgerStatementQuery();
@@ -234,48 +236,63 @@ export default function LedgersPage() {
         </button>
       </div>
 
-      {/* Net Summary Dashboard row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 bg-slate-50 border-b border-[#E4E4F0]">
-        <div className="bg-white p-4.5 rounded-xl border border-[#E2E8F0] flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <ArrowDownLeft className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              {activeTab === "customer" ? t("ledgers.theyOwe") : t("ledgers.theyOwe")}
-            </span>
-            <span className="text-xl font-bold font-mono text-emerald-600 block mt-0.5">
-              ₹{theyOweTotal.toFixed(2)}
-            </span>
-          </div>
+      {/* Net Summary and List View */}
+      {hasNoParties && !loading ? (
+        <div className="border border-[#E4E4F0] rounded-b-xl bg-white">
+          <EmptyState
+            icon={UserPlus}
+            title={t("ledgers.noContactsYet")}
+            description={t("ledgers.noContactsYetDesc")}
+            actionText={t("ledgers.addContact")}
+            onAction={() => setIsAddModalOpen(true)}
+          />
         </div>
+      ) : (
+        <>
+          {/* Net Summary Dashboard row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 bg-slate-50 border-b border-[#E4E4F0]">
+            <div className="bg-white p-4.5 rounded-xl border border-[#E2E8F0] flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <ArrowDownLeft className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  {activeTab === "customer" ? t("ledgers.theyOwe") : t("ledgers.theyOwe")}
+                </span>
+                <span className="text-xl font-bold font-mono text-emerald-600 block mt-0.5">
+                  ₹{theyOweTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
 
-        <div className="bg-white p-4.5 rounded-xl border border-[#E2E8F0] flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <ArrowUpRight className="h-5 w-5" />
+            <div className="bg-white p-4.5 rounded-xl border border-[#E2E8F0] flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <ArrowUpRight className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  {activeTab === "customer" ? t("ledgers.youOwe") : t("ledgers.youOwe")}
+                </span>
+                <span className="text-xl font-bold font-mono text-amber-600 block mt-0.5">
+                  ₹{weOweTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              {activeTab === "customer" ? t("ledgers.youOwe") : t("ledgers.youOwe")}
-            </span>
-            <span className="text-xl font-bold font-mono text-amber-600 block mt-0.5">
-              ₹{weOweTotal.toFixed(2)}
-            </span>
-          </div>
-        </div>
-      </div>
 
-      {/* Contacts DataTable list */}
-      <DataTable
-        columns={columns}
-        data={parties}
-        loading={loading}
-        total={total}
-        limit={limit}
-        offset={offset}
-        onPageChange={(newOffset) => setOffset(newOffset)}
-        showingText={t("catalog.showing")}
-      />
+          {/* Contacts DataTable list */}
+          <DataTable
+            columns={columns}
+            data={parties}
+            loading={loading}
+            total={total}
+            limit={limit}
+            offset={offset}
+            onPageChange={(newOffset) => setOffset(newOffset)}
+            showingText={t("catalog.showing")}
+          />
+        </>
+      )}
 
       {/* Ledger statement (passbook) drawer */}
       {selectedParty && (
