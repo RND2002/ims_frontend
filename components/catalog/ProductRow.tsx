@@ -75,14 +75,15 @@ export function ProductRow({
         isSelected && "bg-[#F7F7FB]"
       )}
     >
-      {/* Checkbox column */}
-      <td className="px-4 py-3.5 w-10 text-center select-none">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={(e) => onSelect(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA] cursor-pointer"
-        />
+      {/* Edit button column */}
+      <td className="px-4 py-3.5 w-12 text-center select-none">
+        <button
+          onClick={onEdit}
+          className="h-8.5 w-8.5 rounded-lg border border-[#E4E4F0] bg-white text-[#65637D] hover:text-[#4338CA] hover:bg-[#F7F7FB] flex items-center justify-center transition-all cursor-pointer outline-none mx-auto"
+          title="Edit Product"
+        >
+          <FileEdit className="h-4 w-4" />
+        </button>
       </td>
 
       {/* Product Name & SKU merged column */}

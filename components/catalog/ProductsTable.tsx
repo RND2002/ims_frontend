@@ -67,13 +67,8 @@ export function ProductsTable({
         {/* Table Head */}
         <thead>
           <tr className="bg-[#F7F7FB] border-b border-[#C7C7E0]">
-            <th className="px-4 py-3 w-10 text-center">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                onChange={(e) => onSelectAll(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA] cursor-pointer"
-              />
+            <th className="px-4 py-3 w-12 text-center text-[10px] uppercase font-bold tracking-wider text-[#65637D] select-none">
+              Edit
             </th>
             {columns.map((col, idx) => (
               <th

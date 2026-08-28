@@ -155,32 +155,32 @@ export default function StoreDashboardPage() {
           <h1 className="text-xl lg:text-2xl font-extrabold text-[#151328] tracking-tight">
             {t("dashboard.title")}
           </h1>
-          <p className="mt-0.5 text-xs font-semibold text-[#65637D] flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-            {t("dashboard.todayAt")} <span className="font-bold text-[#151328]">{storeName}</span> —
+          <p className="mt-1 text-xs font-semibold text-[#65637D]">
+            <span className="relative mr-2 inline-flex h-2 w-2 align-middle">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="align-middle">
+              {t("dashboard.todayAt")} <span className="font-bold text-[#151328]">{storeName}</span> — {new Date().toLocaleDateString(language === "hi" ? "hi-IN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </span>
           </p>
         </div>
 
-        {/* Date Selector */}
-        <div className="flex items-center gap-2">
-          <div className="h-9.5 px-3 rounded-lg border border-[#E4E4F0] bg-white text-xs font-bold text-[#65637D] flex items-center gap-1.5 cursor-pointer shadow-xs">
-            <Calendar className="h-3.5 w-3.5" />
-            {t("dashboard.thisMonth")}
-          </div>
-
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2.5">
           <Link
             href={`/store/${storeId}/sales`}
-            className="h-9.5 px-4 bg-[#FF6B5B] hover:bg-[#E05344] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="h-10 px-4 bg-[#FF6B5B] hover:bg-[#FF5645] hover:shadow-[0_4px_12px_rgba(255,107,91,0.25)] text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] duration-150 cursor-pointer select-none"
           >
-            <ShoppingBag className="h-3.5 w-3.5" />
+            <ShoppingBag className="h-4 w-4" />
             {t("dashboard.quickActionRecordSale")}
           </Link>
 
           <Link
             href={`/store/${storeId}/purchases/import`}
-            className="h-9.5 px-4 bg-[#4338CA] hover:bg-[#372f9f] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="h-10 px-4 bg-[#4F46E5] hover:bg-[#4338CA] hover:shadow-[0_4px_12px_rgba(79,70,229,0.25)] text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] duration-150 cursor-pointer select-none"
           >
-            <Upload className="h-3.5 w-3.5" />
+            <Upload className="h-4 w-4" />
             {language === "hi" ? "खरीद इम्पोर्ट / Import Purchase" : "Import Purchase"}
           </Link>
         </div>

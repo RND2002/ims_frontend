@@ -37,7 +37,12 @@ export default function WorkspaceSetupPage() {
         }
         if (active) setIsAuthChecking(false);
       } catch {
-        if (active) router.push("/login");
+        try {
+          await dispatch(logoutUser()).unwrap();
+        } catch (logoutErr) {
+          console.error("Failed to clean up session in workspace-setup:", logoutErr);
+        }
+        if (active) router.push("/");
       }
     };
     

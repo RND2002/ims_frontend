@@ -169,7 +169,7 @@ export default function CatalogPage() {
   const hasNoItems = total === 0 && !search && !selectedCategory && !selectedStockStatus;
 
   return (
-    <div className="flex flex-col gap-5 font-sans select-none min-h-screen pb-12">
+    <div className="flex flex-col gap-5 font-sans select-none min-h-screen pb-12 w-full min-w-0">
       
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -191,7 +191,7 @@ export default function CatalogPage() {
           }}
         />
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full min-w-0">
           
           {/* Toolbar panel */}
           <div className="bg-white rounded-t-xl border border-[#E4E4F0] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -213,10 +213,10 @@ export default function CatalogPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-2xl">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-2xl w-full">
                 
                 {/* Search field */}
-                <div className="relative flex-1">
+                <div className="relative flex-1 w-full">
                   <input
                     type="text"
                     placeholder={t("catalog.searchPlaceholder")}
@@ -227,45 +227,48 @@ export default function CatalogPage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#65637D]" />
                 </div>
 
-                {/* Category Dropdown */}
-                <div className="relative">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="h-10 pl-3 pr-9 rounded-lg border border-[#E4E4F0] bg-white text-xs font-bold text-[#65637D] appearance-none outline-none focus:border-[#4338CA] cursor-pointer"
-                  >
-                    <option value="">{t("catalog.allCategories")}</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#65637D] pointer-events-none" />
-                </div>
+                {/* Filters container (Category & Stock) */}
+                <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                  {/* Category Dropdown */}
+                  <div className="relative flex-1 sm:w-40">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full h-10 pl-3 pr-9 rounded-lg border border-[#E4E4F0] bg-white text-xs font-bold text-[#65637D] appearance-none outline-none focus:border-[#4338CA] cursor-pointer"
+                    >
+                      <option value="">{t("catalog.allCategories")}</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#65637D] pointer-events-none" />
+                  </div>
 
-                {/* Stock Status Dropdown */}
-                <div className="relative">
-                  <select
-                    value={selectedStockStatus}
-                    onChange={(e) => setSelectedStockStatus(e.target.value)}
-                    className="h-10 pl-3 pr-9 rounded-lg border border-[#E4E4F0] bg-white text-xs font-bold text-[#65637D] appearance-none outline-none focus:border-[#4338CA] cursor-pointer"
-                  >
-                    <option value="">{t("catalog.allStockStatus")}</option>
-                    <option value="in_stock">{t("catalog.inStock")}</option>
-                    <option value="low_stock">{t("catalog.lowStock")}</option>
-                    <option value="out_of_stock">{t("catalog.outOfStock")}</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#65637D] pointer-events-none" />
+                  {/* Stock Status Dropdown */}
+                  <div className="relative flex-1 sm:w-44">
+                    <select
+                      value={selectedStockStatus}
+                      onChange={(e) => setSelectedStockStatus(e.target.value)}
+                      className="w-full h-10 pl-3 pr-9 rounded-lg border border-[#E4E4F0] bg-white text-xs font-bold text-[#65637D] appearance-none outline-none focus:border-[#4338CA] cursor-pointer"
+                    >
+                      <option value="">{t("catalog.allStockStatus")}</option>
+                      <option value="in_stock">{t("catalog.inStock")}</option>
+                      <option value="low_stock">{t("catalog.lowStock")}</option>
+                      <option value="out_of_stock">{t("catalog.outOfStock")}</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#65637D] pointer-events-none" />
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Right side CTA actions */}
-            <div className="flex items-center gap-2.5 shrink-0 self-end md:self-auto">
+            <div className="flex items-center gap-2.5 shrink-0 w-full md:w-auto">
               <button
                 onClick={handleExport}
-                className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-[#E4E4F0] hover:bg-[#F7F7FB] text-xs font-bold text-[#151328] transition-colors cursor-pointer outline-none"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-[#E4E4F0] hover:bg-[#F7F7FB] text-xs font-bold text-[#151328] transition-colors cursor-pointer outline-none"
               >
                 <Download className="h-4 w-4 text-[#65637D]" />
                 {t("catalog.export")}
@@ -276,7 +279,7 @@ export default function CatalogPage() {
                   setEditingProduct(null);
                   setIsPanelOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-[#FF6B5B] hover:bg-[#E5503F] text-xs font-bold text-white shadow-sm transition-colors cursor-pointer border-none outline-none select-none"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-[#FF6B5B] hover:bg-[#E5503F] text-xs font-bold text-white shadow-sm transition-colors cursor-pointer border-none outline-none select-none"
               >
                 <Plus className="h-4 w-4" />
                 {t("catalog.addProduct")}

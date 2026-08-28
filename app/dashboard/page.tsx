@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchStores } from "@/lib/features/stores/storesSlice";
-import { refreshSession } from "@/lib/features/auth/authSlice";
+import { refreshSession, logoutUser } from "@/lib/features/auth/authSlice";
 
 export default function DashboardRedirectPage() {
   const router = useRouter();
@@ -22,7 +22,12 @@ export default function DashboardRedirectPage() {
         }
       } catch (err) {
         console.error("Failed to load stores during redirect:", err);
-        router.replace("/workspace-setup");
+        try {
+          await dispatch(logoutUser()).unwrap();
+        } catch (logoutErr) {
+          console.error("Failed to clean up session:", logoutErr);
+        }
+        router.replace("/");
       }
     };
 

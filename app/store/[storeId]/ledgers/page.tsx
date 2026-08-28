@@ -121,6 +121,20 @@ export default function LedgersPage() {
   // DataTable column definitions
   const columns: ColumnDef<Party>[] = [
     {
+      id: "actions",
+      header: "Book",
+      meta: { align: "text-center" },
+      cell: ({ row }) => (
+        <button
+          onClick={() => handleOpenStatement(row.original)}
+          className="h-8.5 w-8.5 rounded-lg border border-[#E4E4F0] bg-white text-[#65637D] hover:text-[#4338CA] hover:bg-[#F7F7FB] flex items-center justify-center transition-all cursor-pointer outline-none mx-auto"
+          title="View Ledger Book"
+        >
+          <BookOpen className="h-4 w-4" />
+        </button>
+      ),
+    },
+    {
       accessorKey: "name",
       header: t("ledgers.name"),
       cell: ({ row }) => (
@@ -179,38 +193,29 @@ export default function LedgersPage() {
       },
     },
     {
-      id: "actions",
+      id: "record_payment",
       header: "",
       meta: { align: "text-right" },
       cell: ({ row }) => (
-        <div className="flex gap-2 justify-end">
-          <button
-            onClick={() => handleOpenStatement(row.original)}
-            className="h-8 px-3 rounded-lg hover:bg-slate-100 text-[#4338CA] text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors border border-slate-200"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            {t("ledgers.viewBook")}
-          </button>
-          <button
-            onClick={() => {
-              setSelectedParty(row.original);
-              setIsPaymentOpen(true);
-            }}
-            className="h-8 px-3 rounded-lg bg-white border border-[#C7C7E0] hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <IndianRupee className="h-3.5 w-3.5" />
-            {t("ledgers.recordPayment")}
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setSelectedParty(row.original);
+            setIsPaymentOpen(true);
+          }}
+          className="h-8 px-3 rounded-lg bg-white border border-[#C7C7E0] hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors outline-none ml-auto"
+        >
+          <IndianRupee className="h-3.5 w-3.5 text-slate-500" />
+          {t("ledgers.recordPayment")}
+        </button>
       ),
     },
   ];
 
   return (
-    <div className="flex flex-col h-full font-sans select-none">
+    <div className="flex flex-col h-full font-sans select-none w-full min-w-0">
       
       {/* Header section with Toolbar */}
-      <div className="bg-white px-6 py-4.5 rounded-t-xl border border-[#E4E4F0] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white px-6 py-4.5 rounded-t-xl border border-[#E4E4F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-lg font-bold text-[#151328] flex items-center gap-2">
             {t("ledgers.title")}
@@ -220,23 +225,24 @@ export default function LedgersPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Toolbar controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#98A2B3]" />
+          <div className="relative w-full sm:w-60">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
             <input
               type="text"
               placeholder={t("ledgers.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9.5 pl-9 pr-4 w-60 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-[#F7F7FB]"
+              className="h-10 pl-9 pr-4 w-full rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-[#F7F7FB]"
             />
           </div>
 
           {/* Add contact CTA */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="h-9.5 px-4 bg-brand hover:bg-indigo-700 text-white text-sm font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+            className="h-10 px-4 bg-brand hover:bg-indigo-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-all border-none outline-none select-none"
           >
             <UserPlus className="h-4 w-4" />
             {t("ledgers.addContact")}

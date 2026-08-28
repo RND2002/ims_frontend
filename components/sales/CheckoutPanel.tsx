@@ -568,8 +568,8 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
 
             {isAddingCustomer ? (
               /* Inline Add Customer subform */
-              <form onSubmit={handleQuickCustomerCreate} className="grid grid-cols-12 gap-3 bg-white p-3.5 rounded-lg border border-indigo-100">
-                <div className="col-span-6">
+              <form onSubmit={handleQuickCustomerCreate} className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-white p-3.5 rounded-lg border border-indigo-100">
+                <div className="sm:col-span-6">
                   <input
                     type="text"
                     required
@@ -579,7 +579,7 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
                     className="w-full h-9 px-3 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                   />
                 </div>
-                <div className="col-span-4">
+                <div className="sm:col-span-4">
                   <input
                     type="text"
                     required
@@ -590,17 +590,17 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
                     className="w-full h-9 px-3 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-brand focus:ring-1 focus:ring-brand outline-none font-mono"
                   />
                 </div>
-                <div className="col-span-2 flex gap-1">
+                <div className="sm:col-span-2 flex gap-2">
                   <button
                     type="submit"
-                    className="h-9 w-full bg-brand hover:bg-indigo-700 text-white rounded-lg flex items-center justify-center cursor-pointer shadow-xs"
+                    className="h-9 flex-1 sm:w-full bg-brand hover:bg-indigo-700 text-white rounded-lg flex items-center justify-center cursor-pointer shadow-xs"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsAddingCustomer(false)}
-                    className="h-9 w-full bg-[#F1F5F9] hover:bg-slate-200 text-[#475569] rounded-lg flex items-center justify-center cursor-pointer"
+                    className="h-9 flex-1 sm:w-full bg-[#F1F5F9] hover:bg-slate-200 text-[#475569] rounded-lg flex items-center justify-center cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -639,104 +639,118 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
                 const isOutOfStock = item.product_id && item.quantity > item.current_stock;
                 
                 return (
-                  <div key={item.id} className="flex gap-2.5 items-start">
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-2.5 sm:items-start border-b border-[#F1F5F9] pb-3 sm:border-none sm:pb-0">
                     
-                    {/* Row index bubble */}
-                    <div className="h-9 w-6.5 text-xs font-bold text-[#98A2B3] flex items-center justify-center mt-0.5">
-                      {index + 1}
-                    </div>
-
-                    {/* Product Search Combobox — powered by AsyncSearchSelect */}
-                    <div className="flex-1 min-w-0">
-                      <AsyncSearchSelect
-                        size="sm"
-                        placeholder={t("sales.checkout.scanOrType")}
-                        value={item.product_id || null}
-                        displayValue={item.product_name}
-                        onSearch={makeProductSearchFn(item.id)}
-                        onChange={(opt) => handleSelectProduct(item.id, opt)}
-                      />
-                    </div>
-
-                    {/* Quantity Input */}
-                    <div className="w-28 shrink-0">
-                      <div className={cn(
-                        "flex items-center gap-1 bg-white border border-[#C7C7E0] rounded-lg px-2 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand",
-                        isOutOfStock && "border-red-400 bg-red-50"
-                      )}>
-                        <input
-                          type="number"
-                          min={1}
-                          placeholder="Qty"
-                          value={item.quantity}
-                          ref={(el) => {
-                            if (!rowRefs.current[item.id]) {
-                              rowRefs.current[item.id] = { productInput: null, qtyInput: null, priceInput: null };
-                            }
-                            rowRefs.current[item.id].qtyInput = el;
-                          }}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleQtyChange(item.id, parseInt(e.target.value) || 1)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              focusField(item.id, "priceInput");
-                            }
-                          }}
-                          className={cn(
-                            "w-full h-9 text-center text-sm text-[#151328] placeholder-[#98A2B3] outline-none font-semibold font-mono border-0 p-0",
-                            isOutOfStock && "text-red-700 bg-transparent"
-                          )}
-                        />
-                        {item.unit_symbol && (
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider shrink-0 select-none bg-slate-100 px-1 py-0.5 rounded border border-slate-200">
-                            {item.unit_symbol}
-                          </span>
-                        )}
+                    {/* Top segment: Index + Product search + Mobile delete */}
+                    <div className="flex gap-2.5 items-start w-full flex-1">
+                      {/* Row index bubble */}
+                      <div className="h-9 w-6.5 text-xs font-bold text-[#98A2B3] flex items-center justify-center mt-0.5 shrink-0">
+                        {index + 1}
                       </div>
+
+                      {/* Product Search Combobox — powered by AsyncSearchSelect */}
+                      <div className="flex-1 min-w-0">
+                        <AsyncSearchSelect
+                          size="sm"
+                          placeholder={t("sales.checkout.scanOrType")}
+                          value={item.product_id || null}
+                          displayValue={item.product_name}
+                          onSearch={makeProductSearchFn(item.id)}
+                          onChange={(opt) => handleSelectProduct(item.id, opt)}
+                        />
+                      </div>
+
+                      {/* Delete Action button (Mobile) */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRow(item.id)}
+                        className="sm:hidden h-9 w-9 shrink-0 flex items-center justify-center rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200 text-[#98A2B3] hover:text-red-500 cursor-pointer transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
 
-                    {/* Price Input */}
-                    <div className="w-28 shrink-0">
-                      <div className="relative">
-                        <span className="absolute left-2.5 top-2 text-[11px] font-semibold text-[#65637D]">₹</span>
-                        <input
-                          type="number"
-                          min={0}
-                          step={0.1}
-                          placeholder="Price"
-                          value={item.unit_price}
-                          ref={(el) => {
-                            if (!rowRefs.current[item.id]) {
-                              rowRefs.current[item.id] = { productInput: null, qtyInput: null, priceInput: null };
-                            }
-                            rowRefs.current[item.id].priceInput = el;
-                          }}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handlePriceChange(item.id, parseFloat(e.target.value) || 0)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === "Tab") {
-                              // Save current row, spawn next row and focus its product input
-                              // Tab/Enter inside final price cell starts the Loop!
-                              if (index === items.length - 1) {
-                                e.preventDefault();
-                                handleAddNewRow();
+                    {/* Bottom segment: Qty + Price + Desktop delete */}
+                    <div className="flex gap-2.5 items-center pl-9 sm:pl-0 w-full sm:w-auto shrink-0">
+                      {/* Quantity Input */}
+                      <div className="flex-1 sm:w-28 sm:shrink-0">
+                        <div className={cn(
+                          "flex items-center gap-1 bg-white border border-[#C7C7E0] rounded-lg px-2 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand",
+                          isOutOfStock && "border-red-400 bg-red-50"
+                        )}>
+                          <input
+                            type="number"
+                            min={1}
+                            placeholder="Qty"
+                            value={item.quantity}
+                            ref={(el) => {
+                              if (!rowRefs.current[item.id]) {
+                                rowRefs.current[item.id] = { productInput: null, qtyInput: null, priceInput: null };
                               }
-                            }
-                          }}
-                          className="w-full h-9 pl-6 pr-2 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-brand focus:ring-1 focus:ring-brand outline-none font-semibold font-mono"
-                        />
+                              rowRefs.current[item.id].qtyInput = el;
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            onChange={(e) => handleQtyChange(item.id, parseInt(e.target.value) || 1)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                focusField(item.id, "priceInput");
+                              }
+                            }}
+                            className={cn(
+                              "w-full h-9 text-center text-sm text-[#151328] placeholder-[#98A2B3] outline-none font-semibold font-mono border-0 p-0",
+                              isOutOfStock && "text-red-700 bg-transparent"
+                            )}
+                          />
+                          {item.unit_symbol && (
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider shrink-0 select-none bg-slate-100 px-1 py-0.5 rounded border border-slate-200">
+                              {item.unit_symbol}
+                            </span>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Price Input */}
+                      <div className="flex-1 sm:w-28 sm:shrink-0">
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-2 text-[11px] font-semibold text-[#65637D]">₹</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            placeholder="Price"
+                            value={item.unit_price}
+                            ref={(el) => {
+                              if (!rowRefs.current[item.id]) {
+                                rowRefs.current[item.id] = { productInput: null, qtyInput: null, priceInput: null };
+                              }
+                              rowRefs.current[item.id].priceInput = el;
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            onChange={(e) => handlePriceChange(item.id, parseFloat(e.target.value) || 0)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === "Tab") {
+                                if (index === items.length - 1) {
+                                  e.preventDefault();
+                                  handleAddNewRow();
+                                }
+                              }
+                            }}
+                            className="w-full h-9 pl-6 pr-2 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-brand focus:ring-1 focus:ring-brand outline-none font-semibold font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Delete Action button (Desktop) */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRow(item.id)}
+                        className="hidden sm:flex h-9 w-9 shrink-0 items-center justify-center rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200 text-[#98A2B3] hover:text-red-500 cursor-pointer transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
 
-                    {/* Delete Action button */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveRow(item.id)}
-                      className="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200 text-[#98A2B3] hover:text-red-500 cursor-pointer transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
                 );
               })}

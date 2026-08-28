@@ -185,11 +185,11 @@ export const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.access_token;
       })
-      .addCase(refreshSession.rejected, (state, action) => {
+      .addCase(refreshSession.rejected, (state) => {
         state.loading = false;
         state.accessToken = null;
         state.user = null;
-        state.error = action.payload as string;
+        state.error = null;
       })
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {

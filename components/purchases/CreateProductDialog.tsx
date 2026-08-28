@@ -59,8 +59,8 @@ export function CreateProductDialog({
   const [name, setName] = useState(existingProduct?.name || initialName);
   const [sku, setSku] = useState(existingProduct?.sku || "");
   const [barcode, setBarcode] = useState(existingProduct?.barcode || "");
-  const [costPrice, setCostPrice] = useState(existingProduct?.cost_price !== undefined ? existingProduct.cost_price : initialCostPrice);
-  const [sellingPrice, setSellingPrice] = useState(existingProduct?.selling_price || 0);
+  const [costPrice, setCostPrice] = useState<number | "">(existingProduct?.cost_price !== undefined ? existingProduct.cost_price : initialCostPrice);
+  const [sellingPrice, setSellingPrice] = useState<number | "">(existingProduct?.selling_price !== undefined ? existingProduct.selling_price : 0);
   const [mrp, setMrp] = useState<number | undefined>(existingProduct?.mrp);
   const [categoryId, setCategoryId] = useState(existingProduct?.category_id || "");
   const [unitId, setUnitId] = useState(existingProduct?.unit_id || "");
@@ -76,6 +76,13 @@ export function CreateProductDialog({
       dispatch(fetchTaxRates());
     }
   }, [isOpen, dispatch]);
+
+  // Auto-select category if there is only one
+  useEffect(() => {
+    if (isOpen && categories.length === 1 && !categoryId && !existingProduct?.category_id) {
+      setCategoryId(categories[0].id);
+    }
+  }, [isOpen, categories, categoryId, existingProduct]);
 
   // Sync initial values when they change
   useEffect(() => {
@@ -103,13 +110,13 @@ export function CreateProductDialog({
     if (!unitId) {
       tempErrors.unitId = language === "hi" ? "माप की इकाई का चयन करें" : "Please select a unit";
     }
-    if (costPrice < 0) {
+    if (costPrice !== "" && Number(costPrice) < 0) {
       tempErrors.costPrice = language === "hi" ? "लागत मूल्य 0 या अधिक होना चाहिए" : "Cost price must be 0 or more";
     }
-    if (sellingPrice < 0) {
+    if (sellingPrice !== "" && Number(sellingPrice) < 0) {
       tempErrors.sellingPrice = language === "hi" ? "बिक्री मूल्य 0 या अधिक होना चाहिए" : "Selling price must be 0 or more";
     }
-    if (mrp !== undefined && mrp < sellingPrice) {
+    if (mrp !== undefined && sellingPrice !== "" && mrp < Number(sellingPrice)) {
       tempErrors.mrp = language === "hi" ? "MRP बिक्री मूल्य से अधिक या बराबर होना चाहिए" : "MRP must be >= selling price";
     }
 
@@ -125,8 +132,8 @@ export function CreateProductDialog({
       name,
       sku: sku.trim() || undefined,
       barcode: barcode.trim() || undefined,
-      cost_price: Number(costPrice),
-      selling_price: Number(sellingPrice),
+      cost_price: costPrice === "" ? 0 : Number(costPrice),
+      selling_price: sellingPrice === "" ? 0 : Number(sellingPrice),
       mrp: mrp ? Number(mrp) : undefined,
       category_id: categoryId || undefined,
       tax_rate_id: taxRateId || undefined,
@@ -181,7 +188,8 @@ export function CreateProductDialog({
               type="number"
               step="any"
               value={costPrice}
-              onChange={(e) => setCostPrice(Number(e.target.value))}
+              onChange={(e) => setCostPrice(e.target.value === "" ? "" : Number(e.target.value))}
+              onWheel={(e) => e.currentTarget.blur()}
               error={errors.costPrice}
             />
 
@@ -190,7 +198,8 @@ export function CreateProductDialog({
               type="number"
               step="any"
               value={sellingPrice}
-              onChange={(e) => setSellingPrice(Number(e.target.value))}
+              onChange={(e) => setSellingPrice(e.target.value === "" ? "" : Number(e.target.value))}
+              onWheel={(e) => e.currentTarget.blur()}
               error={errors.sellingPrice}
             />
           </div>
@@ -200,8 +209,9 @@ export function CreateProductDialog({
               label={language === "hi" ? "MRP (₹) / MRP (₹)" : "MRP (₹)"}
               type="number"
               step="any"
-              value={mrp || ""}
-              onChange={(e) => setMrp(e.target.value ? Number(e.target.value) : undefined)}
+              value={mrp !== undefined ? mrp : ""}
+              onChange={(e) => setMrp(e.target.value === "" ? undefined : Number(e.target.value))}
+              onWheel={(e) => e.currentTarget.blur()}
               error={errors.mrp}
               placeholder="Optional"
             />

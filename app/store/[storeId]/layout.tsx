@@ -68,7 +68,12 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
         try {
           await dispatch(fetchStores()).unwrap();
         } catch {
-          if (active) router.push("/login");
+          try {
+            await dispatch(logoutUser()).unwrap();
+          } catch (logoutErr) {
+            console.error("Failed to clean up session in store layout:", logoutErr);
+          }
+          if (active) router.push("/");
           return;
         }
       }

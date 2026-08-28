@@ -232,7 +232,7 @@ export const translations = {
       process: {
         reading: "Reading your invoice...",
         extracting: "Extracting line items...",
-        longTime: "This can take up to 30 seconds. You can safely wait here or check back later.",
+        longTime: "This can take up to 30 seconds.",
         failedTitle: "Couldn't read this invoice clearly",
         failedSubtitle: "Try retaking the photo with better lighting and alignment, or enter items manually.",
         tryAgain: "Try Again",

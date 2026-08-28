@@ -118,9 +118,9 @@ async function request<T>(
       // Retry request with the fresh token
       res = await performFetch(newAccessToken);
     } catch {
-      // Refresh failed, redirect to login page
+      // Refresh failed, redirect to root page
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        window.location.href = "/";
       }
       throw new Error("Session expired. Please log in again.");
     }

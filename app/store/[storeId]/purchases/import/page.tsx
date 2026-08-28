@@ -117,7 +117,7 @@ export default function PurchaseImportPipelinePage() {
 
   // State to hold user review overrides for each line item (keyed by line item ID)
   const [itemResolutions, setItemResolutions] = useState<Record<string, LineItemCommitOverride>>({});
-  
+
   // Local track of product details created inline
   const [newProducts, setNewProducts] = useState<Record<string, ProductCreateInput>>({});
 
@@ -179,7 +179,7 @@ export default function PurchaseImportPipelinePage() {
     try {
       const client = createApiClient(store.getState);
       const batchData = await client.get<ImportBatch>(API_ENDPOINTS.backend.imports.batchById(batchId));
-      
+
       setBatch(batchData);
       setSelectedSupplierId(batchData.party_id || "");
       setBillNo(batchData.bill_no || "");
@@ -208,13 +208,13 @@ export default function PurchaseImportPipelinePage() {
   const initializeResolutions = (items: ImportLineItem[]) => {
     const resolutions: Record<string, LineItemCommitOverride> = {};
     const createdProds: Record<string, ProductCreateInput> = {};
-    
+
     let runningTotal = 0;
 
     items.forEach((item) => {
       // Pre-confirm high-confidence or auto-matched lines
-      const isAuto = item.match_status === ImportMatchStatus.AutoMatched || 
-                     (item.match_status === ImportMatchStatus.Suggested && (item.match_confidence || 0) >= 0.85);
+      const isAuto = item.match_status === ImportMatchStatus.AutoMatched ||
+        (item.match_status === ImportMatchStatus.Suggested && (item.match_confidence || 0) >= 0.85);
 
       const action = isAuto ? ImportResolvedAction.MatchedExisting : item.resolved_action;
       const prodId = isAuto ? item.matched_product_id : item.resolved_product_id;
@@ -243,12 +243,12 @@ export default function PurchaseImportPipelinePage() {
   // Start polling
   const startPolling = (batchId: string) => {
     if (pollingInterval.current) clearInterval(pollingInterval.current);
-    
+
     pollingInterval.current = setInterval(async () => {
       try {
         const client = createApiClient(store.getState);
         const batchData = await client.get<ImportBatch>(API_ENDPOINTS.backend.imports.batchById(batchId));
-        
+
         if (batchData.status !== ImportBatchStatus.Processing) {
           clearInterval(pollingInterval.current!);
           setBatch(batchData);
@@ -281,7 +281,7 @@ export default function PurchaseImportPipelinePage() {
     setCurrentScreen("PROCESSING");
     try {
       const client = createApiClient(store.getState);
-      
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -318,6 +318,7 @@ export default function PurchaseImportPipelinePage() {
       }
     } catch (err: any) {
       setErrorText(err.message || "Failed to upload file");
+      setCurrentScreen("UPLOAD");
     } finally {
       setLoading(false);
     }
@@ -352,7 +353,7 @@ export default function PurchaseImportPipelinePage() {
     setSaveStatus("saving");
     try {
       const client = createApiClient(store.getState);
-      
+
       const itemsPayload = Object.values(itemResolutions).map((res) => ({
         id: res.id,
         resolved_action: res.resolved_action,
@@ -704,7 +705,7 @@ export default function PurchaseImportPipelinePage() {
 
             {/* Indeterminate progress bar */}
             <div className="h-1.5 w-full bg-[#E4E4F0] rounded-full overflow-hidden relative">
-              <div className="h-full bg-[#4338CA] w-1/3 rounded-full absolute left-0 top-0 animate-[shimmer_1.5s_infinite_linear] style-shimmer" 
+              <div className="h-full bg-[#4338CA] w-1/3 rounded-full absolute left-0 top-0 animate-[shimmer_1.5s_infinite_linear] style-shimmer"
                 style={{
                   animationName: "shimmer",
                   animationDuration: "1.5s",
@@ -846,7 +847,7 @@ export default function PurchaseImportPipelinePage() {
   if (batch) {
     batch.line_items.forEach((item) => {
       const res = itemResolutions[item.id];
-      const isUnresolved = !res || 
+      const isUnresolved = !res ||
         (res.resolved_action === ImportResolvedAction.MatchedExisting && !res.resolved_product_id) ||
         (res.resolved_action === ImportResolvedAction.CreatedNew && !newProducts[item.id]) ||
         (res.resolved_action === ImportResolvedAction.Skipped && !res.expense_category);
@@ -871,9 +872,9 @@ export default function PurchaseImportPipelinePage() {
   }));
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] overflow-hidden bg-[#F7F7FB] font-sans -mx-4 -my-4 lg:-mx-8 lg:-my-8">
+    <div className="flex flex-col lg:h-[calc(100vh-6rem)] lg:overflow-hidden bg-[#F7F7FB] font-sans -mx-4 -my-4 lg:-mx-8 lg:-my-8">
       {/* ----------------- REVIEW TOP BAR ----------------- */}
-      <header className="sticky top-0 bg-white border-b border-[#E4E4F0] px-6 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0 z-30 select-none">
+      <header className="sticky top-0 bg-white border-b border-[#E4E4F0] px-6 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 z-30 select-none">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push(`/store/${storeId}/purchases`)}
@@ -892,10 +893,10 @@ export default function PurchaseImportPipelinePage() {
         </div>
 
         {/* Input Parameters */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 w-full md:w-auto">
           {/* Supplier Dropdown */}
-          <div className="flex flex-col gap-0.5 w-48 text-left z-40">
-            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left">
+          <div className="col-span-2 sm:w-48 text-left z-40">
+            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left block mb-1">
               {t("imports.review.supplier")} *
             </span>
             <CreatableSelect
@@ -912,8 +913,8 @@ export default function PurchaseImportPipelinePage() {
           </div>
 
           {/* Bill No Input */}
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left">
+          <div className="col-span-1 flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left block mb-1">
               {t("imports.review.billNo")}
             </span>
             <input
@@ -924,13 +925,13 @@ export default function PurchaseImportPipelinePage() {
                 markDirty();
               }}
               placeholder="Bill No"
-              className="h-8 w-24 rounded-lg border border-[#E4E4F0] px-2 text-xs font-semibold bg-white text-[#151328] focus:border-[#4338CA] outline-none"
+              className="h-8.5 w-full sm:w-24 rounded-lg border border-[#E4E4F0] px-2.5 text-xs font-semibold bg-white text-[#151328] focus:border-[#4338CA] outline-none"
             />
           </div>
 
           {/* Invoice Date */}
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left">
+          <div className="col-span-1 flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold text-[#65637D] leading-none text-left block mb-1">
               {t("imports.review.date")}
             </span>
             <input
@@ -940,7 +941,7 @@ export default function PurchaseImportPipelinePage() {
                 setInvoiceDate(e.target.value);
                 markDirty();
               }}
-              className="h-8 w-32 rounded-lg border border-[#E4E4F0] px-2 text-xs font-semibold bg-white text-[#151328] focus:border-[#4338CA] outline-none"
+              className="h-8.5 w-full sm:w-32 rounded-lg border border-[#E4E4F0] px-2.5 text-xs font-semibold bg-white text-[#151328] focus:border-[#4338CA] outline-none"
             />
           </div>
         </div>
@@ -969,10 +970,10 @@ export default function PurchaseImportPipelinePage() {
       </header>
 
       {/* ----------------- MAIN SPLIT PANE ----------------- */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-        
+      <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden relative">
+
         {/* LEFT PANE - Image viewer (40%) */}
-        <div className="w-full lg:w-[40%] border-r border-[#E4E4F0] bg-white flex flex-col overflow-hidden select-none">
+        <div className="hidden lg:flex lg:w-[40%] border-r border-[#E4E4F0] bg-white flex-col overflow-hidden select-none">
           {/* Zoom Controls Overlay Toolbar */}
           <div className="p-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#65637D] flex items-center gap-1">
@@ -1060,7 +1061,7 @@ export default function PurchaseImportPipelinePage() {
               </div>
             )}
           </div>
-          
+
           <div className="px-4 py-2 bg-slate-50 text-[10px] text-[#65637D] border-t border-slate-100 flex items-center justify-between shrink-0 font-medium">
             <span>{t("imports.review.panningInstructions")}</span>
             <span>Uploaded: {batch ? new Date(batch.created_at).toLocaleDateString() : ""}</span>
@@ -1068,19 +1069,19 @@ export default function PurchaseImportPipelinePage() {
         </div>
 
         {/* RIGHT PANE - Line Items Review (60%) */}
-        <div className="w-full lg:w-[60%] flex flex-col overflow-hidden bg-[#F7F7FB]">
-          
+        <div className="w-full lg:w-[60%] flex-grow lg:flex-1 flex flex-col lg:overflow-hidden bg-[#F7F7FB]">
+
           {/* Section Header Controls */}
-          <div className="px-6 py-3 border-b border-[#E4E4F0] bg-white flex items-center justify-between shrink-0 select-none">
-            <div className="flex items-center gap-2">
+          <div className="px-6 py-3.5 border-b border-[#E4E4F0] bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 shrink-0 select-none">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-extrabold text-[#151328]">
                 {t("imports.review.lineItems")}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#EEF2FF] text-[#4338CA]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#EEF2FF] text-[#4338CA]">
                 {batch ? batch.line_items.length : 0} {t("imports.review.totalItemsCount")}
               </span>
               {unresCount > 0 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 animate-pulse border border-amber-200">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 animate-pulse border border-amber-200">
                   {unresCount} {t("imports.review.unresolvedCount")}
                 </span>
               )}
@@ -1089,7 +1090,7 @@ export default function PurchaseImportPipelinePage() {
             {batch && (
               <button
                 onClick={handleConfirmAllSuggested}
-                className="text-xs font-bold text-[#4338CA] hover:text-[#372f9f] transition-all cursor-pointer border border-[#E4E4F0] rounded-lg px-3 py-1.5 shadow-2xs hover:bg-[#F7F7FB] flex items-center gap-1"
+                className="w-full sm:w-auto text-xs font-bold text-[#4338CA] hover:text-[#372f9f] transition-all cursor-pointer border border-[#E4E4F0] rounded-lg px-3 py-2 sm:py-1.5 shadow-2xs hover:bg-[#F7F7FB] flex items-center justify-center gap-1.5"
               >
                 <CheckCircle className="h-3.5 w-3.5" />
                 {t("imports.review.confirmAllSuggested")}
@@ -1098,8 +1099,8 @@ export default function PurchaseImportPipelinePage() {
           </div>
 
           {/* Scrollable list */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-            
+          <div className="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-4 sm:space-y-6">
+
             {/* 1. NEEDS ATTENTION GROUP */}
             {attentionItems.length > 0 && (
               <div className="space-y-3">
@@ -1107,7 +1108,7 @@ export default function PurchaseImportPipelinePage() {
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping inline-block" />
                   {t("imports.review.needsAttention")}
                 </span>
-                
+
                 <div className="space-y-3.5">
                   {attentionItems.map((item) => {
                     const res = itemResolutions[item.id] || {};
@@ -1118,7 +1119,7 @@ export default function PurchaseImportPipelinePage() {
                       <div
                         key={item.id}
                         className={cn(
-                          "bg-[#FFFBEB] border border-amber-200 rounded-xl p-4.5 space-y-4 hover:shadow-xs transition-shadow relative overflow-hidden",
+                          "bg-[#FFFBEB] border border-amber-200 rounded-xl p-3 sm:p-4 space-y-3 sm:space-y-4 hover:shadow-xs transition-shadow relative overflow-hidden",
                           item.flagged_reason && "border-red-200 bg-red-50/20"
                         )}
                       >
@@ -1195,7 +1196,7 @@ export default function PurchaseImportPipelinePage() {
                         </div>
 
                         {/* Middle row: edit quantity, rate and amount values */}
-                        <div className="grid grid-cols-3 gap-3 border-y border-slate-200/50 py-3 bg-white/40 -mx-4.5 px-4.5 select-none">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3 border-y border-slate-200/50 py-2 sm:py-3 bg-white/40 -mx-3 px-3 sm:-mx-4 sm:px-4 select-none">
                           <div>
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                               Qty {(() => {
@@ -1213,6 +1214,7 @@ export default function PurchaseImportPipelinePage() {
                                   line_total: val * (res.unit_cost || 0),
                                 });
                               }}
+                              onWheel={(e) => e.currentTarget.blur()}
                               className="h-8 w-full border border-[#E4E4F0] bg-white rounded-lg px-2 text-xs font-mono font-bold text-[#151328]"
                             />
                           </div>
@@ -1231,6 +1233,7 @@ export default function PurchaseImportPipelinePage() {
                                   line_total: (res.quantity || 0) * val,
                                 });
                               }}
+                              onWheel={(e) => e.currentTarget.blur()}
                               className="h-8 w-full border border-[#E4E4F0] bg-white rounded-lg px-2 text-xs font-mono font-bold text-[#151328]"
                             />
                           </div>
@@ -1248,6 +1251,7 @@ export default function PurchaseImportPipelinePage() {
                                   line_total: val,
                                 });
                               }}
+                              onWheel={(e) => e.currentTarget.blur()}
                               className="h-8 w-full border border-[#E4E4F0] bg-white rounded-lg px-2 text-xs font-mono font-bold text-[#151328]"
                             />
                           </div>
@@ -1263,8 +1267,8 @@ export default function PurchaseImportPipelinePage() {
                               </span>
                               <div className="flex flex-wrap gap-2 justify-start">
                                 {candidates.map((cand) => {
-                                  const isSelected = res.resolved_product_id === cand.product_id && 
-                                                     res.resolved_action === ImportResolvedAction.MatchedExisting;
+                                  const isSelected = res.resolved_product_id === cand.product_id &&
+                                    res.resolved_action === ImportResolvedAction.MatchedExisting;
                                   return (
                                     <button
                                       key={cand.product_id}
@@ -1294,10 +1298,10 @@ export default function PurchaseImportPipelinePage() {
                           )}
 
                           {/* 2. If No Match or general actions buttons */}
-                          <div className="flex flex-wrap gap-2 justify-start select-none pt-1">
+                          <div className="flex gap-2 justify-start select-none pt-1 w-full">
                             {/* Resolve button for ambiguous when selected */}
                             {res.resolved_action === ImportResolvedAction.MatchedExisting && res.resolved_product_id && (
-                              <span className="text-xs font-extrabold text-[#047857] flex items-center gap-1 py-1 mr-2 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5">
+                              <span className="text-xs font-extrabold text-[#047857] flex items-center gap-1 py-1 mr-2 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 shrink-0">
                                 <Check className="h-4 w-4" />
                                 {t("imports.review.linked")}
                               </span>
@@ -1309,14 +1313,14 @@ export default function PurchaseImportPipelinePage() {
                               onClick={() => setSelectedLineForProduct(item)}
                               variant="outline"
                               className={cn(
-                                "h-8 px-3.5 border-dashed border-[#C7C7E0] text-[#4338CA] hover:border-[#4338CA] hover:bg-brand-light/20 flex items-center gap-1",
+                                "flex-1 h-8 px-1.5 sm:px-3.5 border-dashed border-[#C7C7E0] text-[#4338CA] hover:border-[#4338CA] hover:bg-brand-light/20 flex items-center justify-center gap-1 text-[10px] sm:text-xs whitespace-nowrap",
                                 (res.resolved_action === ImportResolvedAction.CreatedNew && newProducts[item.id]) && "bg-emerald-50 border-emerald-500 border-solid text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-600"
                               )}
                             >
                               {(res.resolved_action === ImportResolvedAction.CreatedNew && newProducts[item.id]) ? (
-                                <Check className="h-3.5 w-3.5" />
+                                <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               ) : (
-                                <Plus className="h-3.5 w-3.5" />
+                                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               )}
                               {(res.resolved_action === ImportResolvedAction.CreatedNew && newProducts[item.id])
                                 ? t("imports.review.productDetailsFilled")
@@ -1334,7 +1338,7 @@ export default function PurchaseImportPipelinePage() {
                               }}
                               variant="outline"
                               className={cn(
-                                "h-8 px-3.5 border-[#E4E4F0] text-[#65637D] hover:bg-slate-50",
+                                "flex-1 h-8 px-1.5 sm:px-3.5 border-[#E4E4F0] text-[#65637D] hover:bg-slate-50 flex items-center justify-center gap-1 text-[10px] sm:text-xs whitespace-nowrap",
                                 res.resolved_action === ImportResolvedAction.Skipped && "bg-slate-100 border-[#65637D] text-[#151328]"
                               )}
                             >
@@ -1480,11 +1484,11 @@ export default function PurchaseImportPipelinePage() {
           </div>
 
           {/* ----------------- BOTTOM EDITING BAR ----------------- */}
-          <footer className="sticky bottom-0 bg-white border-t border-[#E4E4F0] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 z-20 select-none">
+          <footer className="sticky bottom-0 bg-white border-t border-[#E4E4F0] px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 z-20 select-none">
             {/* Total breakdown */}
-            <div className="flex items-center gap-4 flex-wrap w-full md:w-auto text-left">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none mb-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full md:w-auto text-left">
+              <div className="flex items-center justify-between sm:block border-b sm:border-none pb-2 sm:pb-0 border-slate-100 w-full sm:w-auto">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none sm:mb-1">
                   {t("imports.review.totalInvoice")}
                 </span>
                 <span className="text-xl font-extrabold text-[#151328] font-mono">
@@ -1493,7 +1497,7 @@ export default function PurchaseImportPipelinePage() {
               </div>
 
               {/* Amount Paid input */}
-              <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between items-center sm:flex-col sm:items-start gap-1 w-full sm:w-auto">
                 <span className="text-[10px] font-bold text-[#65637D] leading-none text-left">
                   {t("imports.review.paidAmount")}
                 </span>
@@ -1503,18 +1507,19 @@ export default function PurchaseImportPipelinePage() {
                     step="any"
                     value={amountPaid || ""}
                     onChange={(e) => setAmountPaid(Number(e.target.value))}
-                    className="h-8 w-24 rounded-lg border border-[#E4E4F0] px-2 text-xs font-mono font-bold text-[#151328] bg-white outline-none focus:border-[#4338CA]"
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="h-8.5 w-24 rounded-lg border border-[#E4E4F0] px-2 text-xs font-mono font-bold text-[#151328] bg-white outline-none focus:border-[#4338CA]"
                   />
                   {/* Quick-fill chips */}
                   <button
                     onClick={() => setAmountPaid(subtotalVal)}
-                    className="h-6.5 text-[9px] font-extrabold border border-[#E4E4F0] text-[#4338CA] rounded-md px-2 hover:bg-brand-light cursor-pointer transition-colors"
+                    className="h-7 text-[10px] font-extrabold border border-[#E4E4F0] text-[#4338CA] rounded-md px-2.5 hover:bg-brand-light cursor-pointer transition-colors"
                   >
                     {t("imports.review.full")}
                   </button>
                   <button
                     onClick={() => setAmountPaid(0)}
-                    className="h-6.5 text-[9px] font-extrabold border border-[#E4E4F0] text-[#65637D] rounded-md px-2 hover:bg-slate-50 cursor-pointer transition-colors"
+                    className="h-7 text-[10px] font-extrabold border border-[#E4E4F0] text-[#65637D] rounded-md px-2.5 hover:bg-slate-50 cursor-pointer transition-colors"
                   >
                     {t("imports.review.credit")}
                   </button>
@@ -1523,38 +1528,39 @@ export default function PurchaseImportPipelinePage() {
 
               {/* Credit warning balance */}
               {subtotalVal - amountPaid > 0 && selectedSupplierId && (
-                <span className="text-[9px] font-extrabold text-amber-600 bg-amber-50 border border-amber-100 rounded-md px-2 py-1 max-w-[200px] leading-tight block">
+                <span className="text-[9px] font-extrabold text-amber-600 bg-amber-50 border border-amber-100 rounded-md px-2.5 py-1 max-w-full sm:max-w-[200px] leading-tight block">
                   ₹{(subtotalVal - amountPaid).toFixed(2)} balance will be added to Supplier Payable.
                 </span>
               )}
             </div>
 
-            {/* CTAs */}
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <Button
-                onClick={handleDiscard}
-                variant="outline"
-                className="flex-1 md:flex-none py-5 text-xs font-bold border-[#E4E4F0] text-[#65637D] hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
-              >
-                {t("imports.review.discard")}
-              </Button>
+            {/* CTAs with static helper text */}
+            <div className="flex flex-col gap-2.5 w-full md:w-auto">
+              {/* {!isFinalizable && (
+                <div className="w-full text-center text-[10px] font-extrabold text-[#B45309] bg-amber-50 py-1.5 px-3 rounded border border-amber-200 shadow-2xs self-center md:self-end">
+                  {selectedSupplierId === "" 
+                    ? t("imports.review.selectSupplierPrompt")
+                    : t("imports.review.resolveItemsPrompt").replace("{count}", String(unresCount))}
+                </div>
+              )} */}
 
-              <div className="relative flex-1 md:flex-none flex flex-col items-center">
+              <div className="flex items-center gap-3 w-full">
+                <Button
+                  onClick={handleDiscard}
+                  variant="outline"
+                  className="flex-1 md:flex-none py-5 text-xs font-bold border-[#E4E4F0] text-[#65637D] hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
+                >
+                  {t("imports.review.discard")}
+                </Button>
+
                 <Button
                   onClick={handleCommit}
                   disabled={!isFinalizable || loading}
-                  className="w-full py-5 text-xs font-extrabold bg-[#FF6B5B] hover:bg-[#E05344] text-white shadow-sm flex items-center justify-center gap-1.5 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  className="flex-1 md:flex-none py-5 text-xs font-extrabold bg-[#FF6B5B] hover:bg-[#E05344] text-white shadow-sm flex items-center justify-center gap-1.5 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed md:w-44"
                 >
                   {loading && <RefreshCw className="h-3.5 w-3.5 animate-spin" />}
                   {t("imports.review.finalizeCommit")}
                 </Button>
-                {!isFinalizable && (
-                  <span className="absolute -top-6.5 text-[9px] font-extrabold text-[#B45309] bg-amber-50 px-2 py-0.5 rounded border border-amber-200 whitespace-nowrap shadow-2xs">
-                    {selectedSupplierId === "" 
-                      ? t("imports.review.selectSupplierPrompt")
-                      : t("imports.review.resolveItemsPrompt").replace("{count}", String(unresCount))}
-                  </span>
-                )}
               </div>
             </div>
           </footer>

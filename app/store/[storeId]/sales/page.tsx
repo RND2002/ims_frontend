@@ -74,6 +74,20 @@ export default function SalesPage() {
   // Columns definition for reusable DataTable
   const columns: ColumnDef<Sale>[] = [
     {
+      id: "actions",
+      header: "View",
+      meta: { align: "text-center" },
+      cell: ({ row }) => (
+        <button
+          onClick={() => setSelectedSale(row.original)}
+          className="h-8.5 w-8.5 rounded-lg border border-[#E4E4F0] bg-white text-[#65637D] hover:text-[#4338CA] hover:bg-[#F7F7FB] flex items-center justify-center transition-all cursor-pointer outline-none mx-auto"
+          title="View Invoice"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+      ),
+    },
+    {
       accessorKey: "invoice_no",
       header: t("sales.invoiceNo"),
       cell: ({ row }) => (
@@ -133,32 +147,16 @@ export default function SalesPage() {
         );
       },
     },
-    {
-      id: "actions",
-      header: "",
-      meta: { align: "text-right" },
-      cell: ({ row }) => (
-        <button
-          onClick={() => setSelectedSale(row.original)}
-          className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#151328] transition-colors cursor-pointer"
-        >
-          <Eye className="h-4.5 w-4.5" />
-        </button>
-      ),
-    },
   ];
 
   return (
-    <div className="flex flex-col h-full font-sans select-none">
+    <div className="flex flex-col h-full font-sans select-none w-full min-w-0">
       
       {/* Top Banner Toolbar */}
-      <div className="bg-white px-6 py-4.5 rounded-t-xl border border-[#E4E4F0] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white px-6 py-4.5 rounded-t-xl border border-[#E4E4F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-lg font-bold text-[#151328] flex items-center gap-2">
             {t("sales.title")}
-            <span className="text-[10px] font-semibold bg-[#EEF2FF] text-[#4338CA] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
-              F2 Panel
-            </span>
           </h1>
           <p className="text-xs font-semibold text-[#65637D] mt-0.5">
             {t("sales.subtitle").replace("{total}", String(total))}
@@ -166,40 +164,43 @@ export default function SalesPage() {
         </div>
 
         {/* Toolbar controls */}
-        <div className="flex flex-wrap items-center gap-3.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full md:w-auto">
           
           {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#98A2B3]" />
+          <div className="relative w-full sm:w-60">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
             <input
               type="text"
               placeholder={t("sales.searchPlaceholder")}
               value={searchQuery}
               onChange={handleSearchChange}
-              className="h-9.5 pl-9 pr-4 w-60 rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-[#F7F7FB]"
+              className="h-10 pl-9 pr-4 w-full rounded-lg border border-[#C7C7E0] text-sm text-[#151328] placeholder-[#98A2B3] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-[#F7F7FB]"
             />
           </div>
 
-          {/* Status filters */}
-          <select
-            value={statusFilter}
-            onChange={handleStatusChange}
-            className="h-9.5 px-3 rounded-lg border border-[#C7C7E0] text-sm text-[#65637D] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-white cursor-pointer"
-          >
-            <option value="">{t("sales.allStatus")}</option>
-            <option value="paid">{t("sales.paid")}</option>
-            <option value="partial">{t("sales.partial")}</option>
-            <option value="unpaid">{t("sales.unpaid")}</option>
-          </select>
+          {/* Action and Filter Row */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Status filters */}
+            <select
+              value={statusFilter}
+              onChange={handleStatusChange}
+              className="flex-1 sm:flex-none h-10 px-3 rounded-lg border border-[#C7C7E0] text-xs font-bold text-[#65637D] focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] outline-none bg-white cursor-pointer"
+            >
+              <option value="">{t("sales.allStatus")}</option>
+              <option value="paid">{t("sales.paid")}</option>
+              <option value="partial">{t("sales.partial")}</option>
+              <option value="unpaid">{t("sales.unpaid")}</option>
+            </select>
 
-          {/* Add Sale CTA */}
-          <button
-            onClick={() => setIsCheckoutOpen(true)}
-            className="h-9.5 px-4.5 bg-[#FF6B5B] hover:bg-[#E05344] text-white text-sm font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm shadow-[#FF6B5B]/20 transition-all active:scale-[0.98]"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            {t("sales.recordSale")}
-          </button>
+            {/* Add Sale CTA */}
+            <button
+              onClick={() => setIsCheckoutOpen(true)}
+              className="flex-1 sm:flex-none h-10 px-4 bg-[#FF6B5B] hover:bg-[#E05344] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-[#FF6B5B]/20 transition-all active:scale-[0.98] border-none outline-none select-none"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {t("sales.recordSale")}
+            </button>
+          </div>
         </div>
       </div>
 

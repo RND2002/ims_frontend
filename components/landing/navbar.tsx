@@ -50,7 +50,7 @@ export function NavBar() {
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-default hover:bg-bg-app text-xs font-semibold text-text-primary transition-colors cursor-pointer"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-default hover:bg-bg-app text-xs font-semibold text-text-primary transition-colors cursor-pointer"
           >
             <Languages className="size-4 text-text-secondary" />
             {language === "en" ? "हिन्दी" : "English"}
@@ -58,7 +58,7 @@ export function NavBar() {
 
           <Link
             href="/login"
-            className="hidden md:block px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand transition-colors"
+            className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand transition-colors"
           >
             {t("nav.login")}
           </Link>
@@ -110,9 +110,13 @@ export function NavBar() {
               {t("nav.testimonials")}
             </Link>
             <hr className="border-border-default" />
-            <button className="w-full py-2 text-left text-sm font-medium text-text-secondary hover:text-primary">
+            <Link
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              className="w-full py-2 text-left text-sm font-medium text-text-secondary hover:text-primary block"
+            >
               {t("nav.login")}
-            </button>
+            </Link>
           </div>
         </div>
       )}
