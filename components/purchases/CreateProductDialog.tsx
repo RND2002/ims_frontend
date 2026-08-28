@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { ProductCreateInput } from "@/lib/types/imports";
-import { fetchCategories, fetchUnits, fetchTaxRates, createCategory, createUnit, createTaxRate } from "@/lib/features/catalog/catalogSlice";
+import {
+  useGetCategoriesQuery,
+  useGetUnitsQuery,
+  useGetTaxRatesQuery,
+  useCreateCategoryMutation,
+  useCreateUnitMutation,
+  useCreateTaxRateMutation,
+} from "@/lib/features/catalog/catalogApi";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CreatableSelect } from "@/components/ui/creatable-select";
@@ -27,12 +33,20 @@ export function CreateProductDialog({
   initialCostPrice = 0,
   existingProduct = null,
 }: CreateProductDialogProps) {
-  const dispatch = useAppDispatch();
   const { language } = useLanguage();
-  const { categories, units, taxRates } = useAppSelector((state) => state.catalog);
+
+  // RTK Query hooks for dropdown lists
+  const { data: categories = [] } = useGetCategoriesQuery(undefined, { skip: !isOpen });
+  const { data: units = [] } = useGetUnitsQuery(undefined, { skip: !isOpen });
+  const { data: taxRates = [] } = useGetTaxRatesQuery(undefined, { skip: !isOpen });
+
+  // RTK Query mutations
+  const [createCategory] = useCreateCategoryMutation();
+  const [createUnit] = useCreateUnitMutation();
+  const [createTaxRate] = useCreateTaxRateMutation();
 
   const handleCategoryCreate = async (name: string): Promise<string> => {
-    const result = await dispatch(createCategory({ name })).unwrap();
+    const result = await createCategory({ name }).unwrap();
     return result.id;
   };
 
@@ -44,14 +58,14 @@ export function CreateProductDialog({
     } else if (!formattedName.includes("%") && /^\d+$/.test(formattedName)) {
       formattedName = `${formattedName}%`;
     }
-    const result = await dispatch(createTaxRate({ name: formattedName, rate: guessedRate })).unwrap();
+    const result = await createTaxRate({ name: formattedName, rate: guessedRate }).unwrap();
     return result.id;
   };
 
   const handleUnitCreate = async (name: string): Promise<string> => {
     const symbol = name.toLowerCase();
     const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-    const result = await dispatch(createUnit({ name: formattedName, symbol })).unwrap();
+    const result = await createUnit({ name: formattedName, symbol }).unwrap();
     return result.id;
   };
 
@@ -67,15 +81,6 @@ export function CreateProductDialog({
   const [taxRateId, setTaxRateId] = useState(existingProduct?.tax_rate_id || "");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Fetch dropdowns if empty
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(fetchCategories());
-      dispatch(fetchUnits());
-      dispatch(fetchTaxRates());
-    }
-  }, [isOpen, dispatch]);
 
   // Auto-select category if there is only one
   useEffect(() => {

@@ -3,11 +3,19 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Product } from "@/lib/types/catalog";
 import { productSchema, ProductFormData } from "@/lib/schemas/catalog";
-import { createCategory, createTaxRate, createUnit, createProduct, updateProduct } from "@/lib/features/catalog/catalogSlice";
+import {
+  useGetCategoriesQuery,
+  useGetUnitsQuery,
+  useGetTaxRatesQuery,
+  useCreateCategoryMutation,
+  useCreateTaxRateMutation,
+  useCreateUnitMutation,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+} from "@/lib/features/catalog/catalogApi";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -23,10 +31,21 @@ interface ProductPanelProps {
 type TabType = "details" | "history" | "batches";
 
 export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
-  const dispatch = useAppDispatch();
   const { t } = useLanguage();
-  const { categories, units, taxRates, saving } = useAppSelector((state) => state.catalog);
 
+  // RTK Query hooks for dropdown lists
+  const { data: categories = [] } = useGetCategoriesQuery(undefined, { skip: !isOpen });
+  const { data: units = [] } = useGetUnitsQuery(undefined, { skip: !isOpen });
+  const { data: taxRates = [] } = useGetTaxRatesQuery(undefined, { skip: !isOpen });
+
+  // RTK Query mutations
+  const [createCategory] = useCreateCategoryMutation();
+  const [createTaxRate] = useCreateTaxRateMutation();
+  const [createUnit] = useCreateUnitMutation();
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+
+  const saving = isCreating || isUpdating;
   const [activeTab, setActiveTab] = useState<TabType>("details");
 
   // Format options for select dropdowns
@@ -98,7 +117,7 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
   if (!isOpen) return null;
 
   const handleCategoryCreate = async (name: string): Promise<string> => {
-    const result = await dispatch(createCategory({ name })).unwrap();
+    const result = await createCategory({ name }).unwrap();
     return result.id;
   };
 
@@ -114,14 +133,14 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
       formattedName = `${formattedName}%`;
     }
 
-    const result = await dispatch(createTaxRate({ name: formattedName, rate: guessedRate })).unwrap();
+    const result = await createTaxRate({ name: formattedName, rate: guessedRate }).unwrap();
     return result.id;
   };
 
   const handleUnitCreate = async (name: string): Promise<string> => {
     const symbol = name.toLowerCase();
     const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-    const result = await dispatch(createUnit({ name: formattedName, symbol })).unwrap();
+    const result = await createUnit({ name: formattedName, symbol }).unwrap();
     return result.id;
   };
 
@@ -129,9 +148,9 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
     try {
       if (product) {
         // Edit mode
-        await dispatch(
-          updateProduct({
-            id: product.id,
+        await updateProduct({
+          productId: product.id,
+          payload: {
             name: data.name,
             sku: data.sku || undefined,
             barcode: data.barcode || null,
@@ -142,25 +161,23 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
             selling_price: data.selling_price,
             mrp: data.mrp || null,
             reorder_level: data.reorder_level,
-          })
-        ).unwrap();
+          },
+        }).unwrap();
       } else {
         // Add mode
-        await dispatch(
-          createProduct({
-            name: data.name,
-            sku: data.sku || undefined,
-            barcode: data.barcode || undefined,
-            category_id: data.category_id || null,
-            unit_id: data.unit_id || null,
-            tax_rate_id: data.tax_rate_id || null,
-            cost_price: data.cost_price,
-            selling_price: data.selling_price,
-            mrp: data.mrp || null,
-            reorder_level: data.reorder_level,
-            opening_stock: data.opening_stock,
-          })
-        ).unwrap();
+        await createProduct({
+          name: data.name,
+          sku: data.sku || undefined,
+          barcode: data.barcode || undefined,
+          category_id: data.category_id || null,
+          unit_id: data.unit_id || null,
+          tax_rate_id: data.tax_rate_id || null,
+          cost_price: data.cost_price,
+          selling_price: data.selling_price,
+          mrp: data.mrp || null,
+          reorder_level: data.reorder_level,
+          opening_stock: data.opening_stock,
+        }).unwrap();
       }
       onClose();
     } catch (err) {

@@ -202,6 +202,14 @@ export const fetchCategories = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to fetch categories");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState;
+      if (state.catalog.categories.length > 0) {
+        return false;
+      }
+    },
   }
 );
 
@@ -230,6 +238,14 @@ export const fetchUnits = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to fetch units");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState;
+      if (state.catalog.units.length > 0) {
+        return false;
+      }
+    },
   }
 );
 
@@ -258,6 +274,14 @@ export const fetchTaxRates = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to fetch tax rates");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState;
+      if (state.catalog.taxRates.length > 0) {
+        return false;
+      }
+    },
   }
 );
 

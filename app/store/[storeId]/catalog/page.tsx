@@ -2,39 +2,33 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Product } from "@/lib/types/catalog";
 import {
-  fetchProducts,
-  fetchCategories,
-  fetchUnits,
-  fetchTaxRates,
-  deleteProduct,
-  createProduct,
-} from "@/lib/features/catalog/catalogSlice";
+  useGetProductsQuery,
+  useGetCategoriesQuery,
+  useCreateProductMutation,
+  useDeleteProductMutation,
+} from "@/lib/features/catalog/catalogApi";
 import { ProductsTable } from "@/components/catalog/ProductsTable";
 import { ProductPanel } from "@/components/catalog/ProductPanel";
 import { ProductEmptyState } from "@/components/catalog/ProductEmptyState";
-import { Search, ChevronDown, Download, Plus, AlertTriangle, Trash2, Edit } from "lucide-react";
+import { Search, ChevronDown, Download, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CatalogPage() {
   const params = useParams();
   const storeId = params.storeId as string;
-  const dispatch = useAppDispatch();
   const { t } = useLanguage();
-
-  // Redux Selectors
-  const { products, total, limit, offset, categories, loading } = useAppSelector(
-    (state) => state.catalog
-  );
 
   // Component Local State
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStockStatus, setSelectedStockStatus] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [offset, setOffset] = useState(0);
+  const limit = 20;
   
   // Panel triggers
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -43,37 +37,37 @@ export default function CatalogPage() {
   // Debounced search trigger
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      dispatch(
-        fetchProducts({
-          limit,
-          offset: 0, // Reset to first page on search
-          search,
-          category_id: selectedCategory || undefined,
-        })
-      );
+      setDebouncedSearch(search);
+      setOffset(0); // Reset page on search change
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, selectedCategory, limit, dispatch]);
+  }, [search]);
 
-  // Load configuration dropdown parameters
+  // Reset page when category changes
   useEffect(() => {
-    if (storeId) {
-      dispatch(fetchCategories());
-      dispatch(fetchUnits());
-      dispatch(fetchTaxRates());
-    }
-  }, [storeId, dispatch]);
+    setOffset(0);
+  }, [selectedCategory]);
+
+  // RTK Query fetches
+  const { data, isLoading: loading } = useGetProductsQuery({
+    limit,
+    offset,
+    search: debouncedSearch,
+    category_id: selectedCategory || undefined,
+  });
+
+  const products = data?.items || [];
+  const total = data?.total || 0;
+
+  const { data: categories = [] } = useGetCategoriesQuery();
+
+  // RTK Query mutations
+  const [createProduct] = useCreateProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
 
   const handlePageChange = (newOffset: number) => {
-    dispatch(
-      fetchProducts({
-        limit,
-        offset: newOffset,
-        search,
-        category_id: selectedCategory || undefined,
-      })
-    );
+    setOffset(newOffset);
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -99,21 +93,19 @@ export default function CatalogPage() {
 
   const handleDuplicateRow = async (product: Product) => {
     try {
-      await dispatch(
-        createProduct({
-          name: `${product.name} (Copy)`,
-          sku: product.sku ? `${product.sku}-COPY` : undefined,
-          barcode: product.barcode ? `${product.barcode}-COPY` : undefined,
-          category_id: product.category_id,
-          unit_id: product.unit_id,
-          tax_rate_id: product.tax_rate_id,
-          cost_price: product.cost_price,
-          selling_price: product.selling_price,
-          mrp: product.mrp,
-          reorder_level: product.reorder_level,
-          opening_stock: 0,
-        })
-      ).unwrap();
+      await createProduct({
+        name: `${product.name} (Copy)`,
+        sku: product.sku ? `${product.sku}-COPY` : undefined,
+        barcode: product.barcode ? `${product.barcode}-COPY` : undefined,
+        category_id: product.category_id,
+        unit_id: product.unit_id,
+        tax_rate_id: product.tax_rate_id,
+        cost_price: product.cost_price,
+        selling_price: product.selling_price,
+        mrp: product.mrp || undefined,
+        reorder_level: product.reorder_level,
+        opening_stock: 0,
+      }).unwrap();
     } catch (err) {
       console.error("Failed to duplicate product:", err);
     }
@@ -122,7 +114,7 @@ export default function CatalogPage() {
   const handleDeleteRow = async (productId: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
-        await dispatch(deleteProduct(productId)).unwrap();
+        await deleteProduct(productId).unwrap();
         setSelectedIds((prev) => prev.filter((id) => id !== productId));
       } catch (err) {
         console.error("Failed to delete product:", err);
@@ -133,7 +125,7 @@ export default function CatalogPage() {
   const handleBulkDelete = async () => {
     if (confirm(`Are you sure you want to delete ${selectedIds.length} selected products?`)) {
       try {
-        await Promise.all(selectedIds.map((id) => dispatch(deleteProduct(id)).unwrap()));
+        await Promise.all(selectedIds.map((id) => deleteProduct(id).unwrap()));
         setSelectedIds([]);
       } catch (err) {
         console.error("Bulk delete failed:", err);

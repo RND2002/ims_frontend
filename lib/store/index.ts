@@ -4,6 +4,7 @@ import storesReducer from "../features/stores/storesSlice";
 import catalogReducer from "../features/catalog/catalogSlice";
 import salesReducer from "../features/sales/salesSlice";
 import membersReducer from "../features/members/membersSlice";
+import { apiSlice } from "./apiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,7 +13,10 @@ export const store = configureStore({
     catalog: catalogReducer,
     sales: salesReducer,
     members: membersReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
   devTools: process.env.NODE_ENV !== "production",
 });
 

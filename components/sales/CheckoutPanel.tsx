@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { createSale, createCustomer } from "@/lib/features/sales/salesSlice";
-import { fetchTaxRates, fetchUnits } from "@/lib/features/catalog/catalogSlice";
+import { useGetTaxRatesQuery, useGetUnitsQuery } from "@/lib/features/catalog/catalogApi";
+import { useCreateSaleMutation, useCreateCustomerMutation } from "@/lib/features/sales/salesApi";
 import { API_ENDPOINTS } from "@/app/api/endpoints";
 import { createApiClient } from "@/lib/apiClient";
 import { store } from "@/lib/store";
@@ -31,14 +30,15 @@ interface CheckoutItem {
 }
 
 export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
-  const dispatch = useAppDispatch();
   const { t } = useLanguage();
   
-  // Redux state
-  const taxRates = useAppSelector((state) => state.catalog.taxRates);
-  const units = useAppSelector((state) => state.catalog.units);
-  const isSaving = useAppSelector((state) => state.sales.saving);
-  const salesError = useAppSelector((state) => state.sales.error);
+  // RTK Query fetches
+  const { data: taxRates = [] } = useGetTaxRatesQuery(undefined, { skip: !isOpen });
+  const { data: units = [] } = useGetUnitsQuery(undefined, { skip: !isOpen });
+
+  // RTK Query mutations
+  const [createSale, { isLoading: isSaving }] = useCreateSaleMutation();
+  const [createCustomer] = useCreateCustomerMutation();
 
   // Local state
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
@@ -80,9 +80,6 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
   // Fetch initial base details (customers, tax rates, base products list)
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchTaxRates());
-      dispatch(fetchUnits());
-      
       // Reset state
       setSelectedCustomerId("");
       setSelectedCustomerLabel("");
@@ -107,7 +104,7 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
       setNewCustomerName("");
       setNewCustomerPhone("");
     }
-  }, [isOpen, dispatch]);
+  }, [isOpen]);
 
   // Tax rates ID to percentage lookup mapping
   const taxRatesMap = React.useMemo(() => {
@@ -439,9 +436,7 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
     }
     
     try {
-      const result = await dispatch(
-        createCustomer({ name: newCustomerName, phone: newCustomerPhone })
-      ).unwrap();
+      const result = await createCustomer({ name: newCustomerName, phone: newCustomerPhone }).unwrap();
       
       setSelectedCustomerId(result.id);
       setIsAddingCustomer(false);
@@ -475,25 +470,24 @@ export function CheckoutPanel({ isOpen, onClose }: CheckoutPanelProps) {
 
     setErrorMessage(null);
     try {
-      await dispatch(
-        createSale({
-          party_id: selectedCustomerId,
-          subtotal: Math.round(subtotal * 100) / 100,
-          tax_total: Math.round(taxTotal * 100) / 100,
-          grand_total: Math.round(grandTotal * 100) / 100,
-          amount_paid: Math.round(amountPaid * 100) / 100,
-          items: checkoutItems.map((item) => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-          })),
-        })
-      ).unwrap();
+      await createSale({
+        party_id: selectedCustomerId,
+        subtotal: Math.round(subtotal * 100) / 100,
+        tax_total: Math.round(taxTotal * 100) / 100,
+        grand_total: Math.round(grandTotal * 100) / 100,
+        amount_paid: Math.round(amountPaid * 100) / 100,
+        items: checkoutItems.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          tax_rate_id: item.tax_rate_id,
+        })),
+      }).unwrap();
       
       // Success! Close panel
       onClose();
     } catch (err: any) {
-      setErrorMessage(err || "Transaction failed");
+      setErrorMessage(err?.message || "Transaction failed");
     }
   };
 

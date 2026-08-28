@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Product } from "@/lib/types/catalog";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useGetCategoriesQuery } from "@/lib/features/catalog/catalogApi";
 import { MoreHorizontal, FileEdit, Copy, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ export function ProductRow({
   onDelete,
 }: ProductRowProps) {
   const { t } = useLanguage();
-  const categories = useAppSelector((state) => state.catalog.categories);
+  const { data: categories = [] } = useGetCategoriesQuery();
   const matchedCategory = categories.find((c) => c.id === product.category_id);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLTableCellElement>(null);
@@ -88,29 +88,23 @@ export function ProductRow({
 
       {/* Product Name & SKU merged column */}
       <td className="px-4 py-3.5 max-w-[200px]">
-        <div className="flex items-center gap-3">
-          {/* Square Placeholder Avatar */}
-          <div className="h-9 w-9 rounded-lg bg-[#EEF2FF] border border-[#C7C7E0] flex items-center justify-center text-brand font-bold text-xs shrink-0 select-none">
-            {product.name.charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <span className="block text-sm font-semibold text-[#151328] truncate hover:text-[#4338CA] cursor-pointer" onClick={onEdit}>
-              {product.name}
-            </span>
-            <span className="block text-[11px] font-medium text-[#65637D] truncate mt-0.5">
-              {product.sku || "—"}
-            </span>
-          </div>
+        <div className="min-w-0">
+          <span className="block text-sm font-semibold text-[#151328] truncate hover:text-[#4338CA] cursor-pointer" onClick={onEdit}>
+            {product.name}
+          </span>
+          <span className="block text-[11px] font-medium text-[#65637D] truncate mt-0.5">
+            {product.sku ? `${product.sku} • ` : ""}Qty: {product.current_stock} • Price: {formatCurrency(product.selling_price)}
+          </span>
         </div>
       </td>
 
       {/* SKU separate column */}
-      <td className="px-4 py-3.5 text-xs font-semibold text-[#65637D]">
+      <td className="px-4 py-3.5 text-xs font-semibold text-[#65637D] hidden md:table-cell">
         {product.sku || "—"}
       </td>
 
       {/* Category column */}
-      <td className="px-4 py-3.5">
+      <td className="px-4 py-3.5 hidden sm:table-cell">
         {matchedCategory || product.category ? (
           <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-[#F7F7FB] text-[#65637D] border border-[#E4E4F0]">
             {matchedCategory?.name || product.category?.name}
@@ -131,7 +125,7 @@ export function ProductRow({
       </td>
 
       {/* Cost Price */}
-      <td className="px-4 py-3.5 text-right text-sm font-semibold text-[#151328] tabular-nums">
+      <td className="px-4 py-3.5 text-right text-sm font-semibold text-[#151328] tabular-nums hidden md:table-cell">
         {formatCurrency(product.cost_price)}
       </td>
 
@@ -141,7 +135,7 @@ export function ProductRow({
       </td>
 
       {/* Status Badges */}
-      <td className="px-4 py-3.5">{statusBadge}</td>
+      <td className="px-4 py-3.5 hidden lg:table-cell">{statusBadge}</td>
 
       {/* Actions (hover triggers) */}
       <td className="px-4 py-3.5 text-right relative w-12" ref={dropdownRef}>

@@ -2,9 +2,7 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { createApiClient } from "@/lib/apiClient";
-import { store } from "@/lib/store";
-import { API_ENDPOINTS } from "@/app/api/endpoints";
+import { useCreatePartyMutation } from "@/lib/features/ledgers/ledgersApi";
 import { X, Loader2 } from "lucide-react";
 
 interface AddContactDialogProps {
@@ -22,7 +20,8 @@ export function AddContactDialog({ isOpen, onClose, partyType, onSuccess, initia
   const [newAddress, setNewAddress] = useState("");
   const [newOpeningBalance, setNewOpeningBalance] = useState("0");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+
+  const [createParty, { isLoading: saving }] = useCreatePartyMutation();
 
   if (!isOpen) return null;
 
@@ -32,17 +31,15 @@ export function AddContactDialog({ isOpen, onClose, partyType, onSuccess, initia
       setErrorMsg("Name and mobile number are required");
       return;
     }
-    setSaving(true);
     setErrorMsg(null);
     try {
-      const client = createApiClient(store.getState);
-      const data = await client.post(API_ENDPOINTS.backend.parties.base, {
+      const data = await createParty({
         name: newName,
         phone: newPhone,
         party_type: partyType,
         address: newAddress || undefined,
         opening_balance: parseFloat(newOpeningBalance) || 0,
-      });
+      } as any).unwrap();
       // Reset form fields
       setNewName("");
       setNewPhone("");
@@ -52,8 +49,6 @@ export function AddContactDialog({ isOpen, onClose, partyType, onSuccess, initia
       onClose();
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to save contact");
-    } finally {
-      setSaving(false);
     }
   };
 

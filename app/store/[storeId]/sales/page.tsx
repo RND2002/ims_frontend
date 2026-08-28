@@ -1,29 +1,21 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { fetchSales, fetchCustomers } from "@/lib/features/sales/salesSlice";
+import { useGetSalesQuery, useGetCustomersQuery } from "@/lib/features/sales/salesApi";
 import { DataTable } from "@/components/ui/data-table";
 import { CheckoutPanel } from "@/components/sales/CheckoutPanel";
 import { ColumnDef } from "@tanstack/react-table";
 import { Sale } from "@/lib/types/sales";
-import { Search, Sparkles, ShoppingBag, Eye, X } from "lucide-react";
+import { Search, ShoppingBag, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function SalesPage() {
-  const dispatch = useAppDispatch();
   const { t } = useLanguage();
 
-  // Redux state
-  const sales = useAppSelector((state) => state.sales.sales);
-  const total = useAppSelector((state) => state.sales.total);
-  const limit = useAppSelector((state) => state.sales.limit);
-  const offset = useAppSelector((state) => state.sales.offset);
-  const loading = useAppSelector((state) => state.sales.loading);
-  const customers = useAppSelector((state) => state.sales.customers);
-
-  // Local state
+  // Local state for pagination and filtering
+  const [offset, setOffset] = useState(0);
+  const limit = 20;
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -34,15 +26,28 @@ export default function SalesPage() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
+      setOffset(0); // Reset page on search change
     }, 300);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Fetch sales and customers on mount and when query/status changes
+  // Reset page when status filter changes
   useEffect(() => {
-    dispatch(fetchCustomers());
-    dispatch(fetchSales({ limit, offset, search: debouncedSearchQuery, status: statusFilter }));
-  }, [dispatch, limit, offset, debouncedSearchQuery, statusFilter]);
+    setOffset(0);
+  }, [statusFilter]);
+
+  // RTK Query fetches
+  const { data, isLoading: loading } = useGetSalesQuery({
+    limit,
+    offset,
+    search: debouncedSearchQuery,
+    status: statusFilter || undefined,
+  });
+
+  const sales = data?.items || [];
+  const total = data?.total || 0;
+
+  const { data: customers = [] } = useGetCustomersQuery();
 
   // Handle Search Input Change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +61,7 @@ export default function SalesPage() {
 
   // Handle Page Change
   const handlePageChange = (newOffset: number) => {
-    dispatch(fetchSales({ limit, offset: newOffset, search: debouncedSearchQuery, status: statusFilter }));
+    setOffset(newOffset);
   };
 
   // Keyboard shortcut listener to open Checkout Panel (F2)

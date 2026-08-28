@@ -3,15 +3,16 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { DataTable } from "@/components/ui/data-table";
-import { createApiClient } from "@/lib/apiClient";
-import { store } from "@/lib/store";
-import { API_ENDPOINTS } from "@/app/api/endpoints";
 import { ColumnDef } from "@tanstack/react-table";
 import { Party, LedgerEntry, LedgerStatement } from "@/lib/types/sales";
 import { Search, UserPlus, IndianRupee, ArrowDownLeft, ArrowUpRight, BookOpen, X, Loader2, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddContactDialog } from "@/components/ledgers/AddContactDialog";
 import { RecordPaymentDialog } from "@/components/ledgers/RecordPaymentDialog";
+import {
+  useGetPartiesQuery,
+  useLazyGetLedgerStatementQuery,
+} from "@/lib/features/ledgers/ledgersApi";
 
 export default function LedgersPage() {
   const { t } = useLanguage();
@@ -20,19 +21,14 @@ export default function LedgersPage() {
   const [activeTab, setActiveTab] = useState<"customer" | "supplier">("customer");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [parties, setParties] = useState<Party[]>([]);
-  const [total, setTotal] = useState(0);
-  const [limit] = useState(20);
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const limit = 20;
   
   // Add Contact Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Statement Drawer State
   const [selectedParty, setSelectedParty] = useState<Party | null>(null);
-  const [statement, setStatement] = useState<LedgerStatement | null>(null);
-  const [statementLoading, setStatementLoading] = useState(false);
 
   // Record Payment Modal State
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -46,67 +42,29 @@ export default function LedgersPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load parties list
-  const loadParties = async () => {
-    setLoading(true);
-    try {
-      const client = createApiClient(store.getState);
-      const queryParams = new URLSearchParams({
-        party_type: activeTab,
-        limit: String(limit),
-        offset: String(offset),
-      });
-      if (debouncedSearchQuery.trim()) {
-        queryParams.append("search", debouncedSearchQuery.trim());
-      }
-      const data = await client.get<any>(`${API_ENDPOINTS.backend.parties.base}?${queryParams.toString()}`);
-      
-      const items = (data.items || []).map((p: any) => ({
-        ...p,
-        opening_balance: p.opening_balance ? Number(p.opening_balance) : 0,
-        current_balance: p.current_balance ? Number(p.current_balance) : 0,
-      }));
-      setParties(items);
-      setTotal(data.total || 0);
-    } catch (err) {
-      console.error("Failed to load contacts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Reset page offset when active tab changes
   useEffect(() => {
-    loadParties();
-  }, [activeTab, debouncedSearchQuery, offset, limit]);
+    setOffset(0);
+  }, [activeTab]);
 
-  // Load statement details
-  const loadStatement = async (partyId: string) => {
-    setStatementLoading(true);
-    try {
-      const client = createApiClient(store.getState);
-      const data = await client.get<any>(API_ENDPOINTS.backend.ledger.statement(partyId));
-      setStatement({
-        ...data,
-        current_balance: data.current_balance ? Number(data.current_balance) : 0,
-        entries: Array.isArray(data.entries)
-          ? data.entries.map((e: any) => ({
-              ...e,
-              amount: e.amount ? Number(e.amount) : 0,
-              balance_after: e.balance_after ? Number(e.balance_after) : 0,
-            }))
-          : [],
-      });
-    } catch (err) {
-      console.error("Failed to load ledger statements:", err);
-    } finally {
-      setStatementLoading(false);
-    }
-  };
+  // RTK Query fetches
+  const { data, isLoading: loading } = useGetPartiesQuery({
+    partyType: activeTab,
+    limit,
+    offset,
+    search: debouncedSearchQuery,
+  });
+
+  const parties = data?.items || [];
+  const total = data?.total || 0;
+
+  // RTK Query lazy query for fetching specific customer statement on open
+  const [triggerGetStatement, { data: statement, isFetching: statementLoading }] = useLazyGetLedgerStatementQuery();
 
   // Trigger statement drawer opening
   const handleOpenStatement = (party: Party) => {
     setSelectedParty(party);
-    loadStatement(party.id);
+    triggerGetStatement(party.id);
   };
 
   // Aggregate outstanding balance summaries
@@ -461,7 +419,7 @@ export default function LedgersPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         partyType={activeTab}
-        onSuccess={loadParties}
+        onSuccess={() => {}}
       />
 
       {/* Record Payment Dialog Popup Component */}
@@ -471,9 +429,8 @@ export default function LedgersPage() {
         party={selectedParty}
         onSuccess={() => {
           if (selectedParty) {
-            loadStatement(selectedParty.id);
+            triggerGetStatement(selectedParty.id);
           }
-          loadParties();
         }}
       />
 

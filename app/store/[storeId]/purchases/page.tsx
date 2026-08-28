@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAppSelector } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { createApiClient } from "@/lib/apiClient";
-import { store } from "@/lib/store";
-import { API_ENDPOINTS } from "@/app/api/endpoints";
 import { ImportBatch, ImportBatchStatus } from "@/lib/types/imports";
-import { PaginatedResponse } from "@/lib/types/catalog";
-import { Party } from "@/lib/types/sales";
+import {
+  useGetImportBatchesQuery,
+  useGetSuppliersQuery,
+} from "@/lib/features/purchases/purchasesApi";
 import { Button } from "@/components/ui/button";
 import { 
   FileText, 
@@ -33,10 +31,21 @@ export default function PurchasesImportsListPage() {
   const router = useRouter();
   const storeId = params.storeId as string;
   const { language, t } = useLanguage();
-  const { activeStore } = useAppSelector((state) => state.stores);
 
-  // States
-  const [batches, setBatches] = useState<ImportBatch[]>([]);
+  // Pagination states
+  const [offset, setOffset] = useState(0);
+  const limit = 10;
+
+  // RTK Query fetches
+  const { data: batchesData, isLoading: loading, refetch } = useGetImportBatchesQuery(
+    { limit, offset },
+    { skip: !storeId }
+  );
+
+  const batches = batchesData?.items || [];
+  const total = batchesData?.total || 0;
+
+  const { data: parties = [] } = useGetSuppliersQuery(undefined, { skip: !storeId });
 
   const isCsvFile = (url: string | null | undefined): boolean => {
     if (!url) return false;
@@ -47,43 +56,6 @@ export default function PurchasesImportsListPage() {
       return false;
     }
   };
-  const [parties, setParties] = useState<Party[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [limit] = useState(10);
-  const [offset, setOffset] = useState(0);
-
-  // Fetch batches & suppliers
-  const fetchData = async () => {
-    if (!storeId) return;
-    setLoading(true);
-    try {
-      const client = createApiClient(store.getState);
-      
-      // Fetch batches
-      const url = `${API_ENDPOINTS.backend.imports.batches}?limit=${limit}&offset=${offset}`;
-      const response = await client.get<PaginatedResponse<ImportBatch>>(url);
-      setBatches(response.items || []);
-      setTotal(response.total || 0);
-
-      // Fetch parties (suppliers) to map supplier names locally
-      const partiesUrl = `${API_ENDPOINTS.backend.parties.base}?party_type=supplier`;
-      const partiesResponse = await client.get<any>(partiesUrl);
-      if (partiesResponse && "items" in partiesResponse) {
-        setParties(partiesResponse.items || []);
-      } else {
-        setParties(Array.isArray(partiesResponse) ? partiesResponse : []);
-      }
-    } catch (err) {
-      console.error("Failed to load import batches:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [storeId, offset]);
 
   // Find supplier name helper
   const getSupplierName = (partyId: string | null) => {
@@ -157,7 +129,7 @@ export default function PurchasesImportsListPage() {
 
         <div className="flex items-center gap-2">
           <Button
-            onClick={fetchData}
+            onClick={() => refetch()}
             variant="outline"
             className="h-9.5 px-3 border-[#E4E4F0] bg-white text-[#65637D] hover:bg-[#F7F7FB]"
           >

@@ -37,6 +37,14 @@ export const fetchStores = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message || "Network error fetching stores");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState;
+      if (state.stores.stores.length > 0) {
+        return false;
+      }
+    },
   }
 );
 

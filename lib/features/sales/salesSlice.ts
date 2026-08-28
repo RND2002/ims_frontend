@@ -124,6 +124,14 @@ export const fetchCustomers = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to fetch customers");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState;
+      if (state.sales.customers.length > 0) {
+        return false;
+      }
+    },
   }
 );
 

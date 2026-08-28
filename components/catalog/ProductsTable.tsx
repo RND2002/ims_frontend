@@ -52,18 +52,18 @@ export function ProductsTable({
   };
 
   const columns = [
-    { label: t("catalog.fields.product") },
-    { label: t("catalog.fields.skuCol") },
-    { label: t("catalog.fields.categoryCol") },
-    { label: t("catalog.fields.stockQtyCol"), align: "text-right" },
-    { label: t("catalog.fields.unitCostCol"), align: "text-right" },
-    { label: t("catalog.fields.sellingPriceCol"), align: "text-right" },
-    { label: t("catalog.fields.statusCol") },
+    { label: t("catalog.fields.product"), className: "" },
+    { label: t("catalog.fields.skuCol"), className: "hidden md:table-cell" },
+    { label: t("catalog.fields.categoryCol"), className: "hidden sm:table-cell" },
+    { label: t("catalog.fields.stockQtyCol"), align: "text-right", className: "" },
+    { label: t("catalog.fields.unitCostCol"), align: "text-right", className: "hidden md:table-cell" },
+    { label: t("catalog.fields.sellingPriceCol"), align: "text-right", className: "" },
+    { label: t("catalog.fields.statusCol"), className: "hidden lg:table-cell" },
   ];
 
   return (
     <div className="bg-white rounded-b-xl border border-[#E4E4F0] border-t-0 flex flex-col font-sans select-none overflow-x-auto">
-      <table className="w-full text-left border-collapse min-w-[900px]">
+      <table className="w-full text-left border-collapse md:min-w-[900px]">
         {/* Table Head */}
         <thead>
           <tr className="bg-[#F7F7FB] border-b border-[#C7C7E0]">
@@ -75,7 +75,8 @@ export function ProductsTable({
                 key={idx}
                 className={cn(
                   "px-4 py-3 text-[10px] uppercase font-bold tracking-wider text-[#65637D] select-none",
-                  col.align || "text-left"
+                  col.align || "text-left",
+                  col.className
                 )}
               >
                 <div

@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { createApiClient } from "@/lib/apiClient";
-import { store } from "@/lib/store";
-import { API_ENDPOINTS } from "@/app/api/endpoints";
+import { useRecordPaymentMutation } from "@/lib/features/ledgers/ledgersApi";
 import { Party } from "@/lib/types/sales";
 import { X, Loader2 } from "lucide-react";
 
@@ -23,7 +21,8 @@ export function RecordPaymentDialog({ isOpen, onClose, party, onSuccess }: Recor
   const [paymentNote, setPaymentNote] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [paymentSuccessMsg, setPaymentSuccessMsg] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+
+  const [recordPayment, { isLoading: saving }] = useRecordPaymentMutation();
 
   // Sync default transaction type when dialog opens
   useEffect(() => {
@@ -41,19 +40,17 @@ export function RecordPaymentDialog({ isOpen, onClose, party, onSuccess }: Recor
       setErrorMsg("Please enter a valid positive payment amount");
       return;
     }
-    setSaving(true);
     setErrorMsg(null);
     try {
-      const client = createApiClient(store.getState);
       const direction = paymentType === "credit" ? "received" : "paid";
-      await client.post(API_ENDPOINTS.backend.ledger.payments, {
+      await recordPayment({
         party_id: party.id,
         amount: amt,
         entry_type: paymentType,
         payment_mode: paymentMode,
         direction: direction,
         note: paymentNote || undefined,
-      });
+      }).unwrap();
       setPaymentSuccessMsg(t("ledgers.paymentSuccess"));
       setPaymentAmount("");
       setPaymentNote("");
@@ -65,8 +62,6 @@ export function RecordPaymentDialog({ isOpen, onClose, party, onSuccess }: Recor
       }, 1000);
     } catch (err: any) {
       setErrorMsg(err.message || t("ledgers.paymentFailed"));
-    } finally {
-      setSaving(false);
     }
   };
 
