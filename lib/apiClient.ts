@@ -24,18 +24,17 @@ async function getRefreshedToken(): Promise<string> {
     return activeRefreshPromise;
   }
 
-  // Dynamically import to avoid circular dependencies during store/slice initialization
-  const { refreshSession } = await import("@/lib/features/auth/authSlice");
+  const { authApi } = await import("@/lib/features/auth/authApi");
   const { store } = await import("@/lib/store");
 
   activeRefreshPromise = store
-    .dispatch(refreshSession())
+    .dispatch(authApi.endpoints.refreshSession.initiate())
     .unwrap()
-    .then((res) => {
+    .then((res: { access_token: string }) => {
       activeRefreshPromise = null;
       return res.access_token;
     })
-    .catch((err) => {
+    .catch((err: unknown) => {
       activeRefreshPromise = null;
       throw err;
     });

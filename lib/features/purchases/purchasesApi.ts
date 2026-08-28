@@ -16,7 +16,7 @@ export const purchasesApi = apiSlice.injectEndpoints({
         if (params.offset !== undefined) queryParams.append("offset", String(params.offset));
         return `${API_ENDPOINTS.backend.imports.batches}?${queryParams.toString()}`;
       },
-      providesTags: ["Product"], // Invalidates/updates when imports commit
+      providesTags: ["ImportBatch"],
     }),
     getSuppliers: builder.query<Party[], void>({
       query: () => {
@@ -32,10 +32,38 @@ export const purchasesApi = apiSlice.injectEndpoints({
       },
       providesTags: ["Party"],
     }),
+    createManualPurchase: builder.mutation<
+      any,
+      {
+        party_id: string;
+        bill_no: string;
+        grand_total: number;
+        amount_paid: number;
+        items: {
+          product_id: string;
+          quantity: number;
+          unit_cost: number;
+          batch_no?: string;
+          expiry_date?: string | null;
+        }[];
+      }
+    >({
+      query: (payload) => ({
+        url: API_ENDPOINTS.backend.transactions.purchases,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Product", "Party", "ImportBatch"],
+    }),
+    getImportBatchById: builder.query<ImportBatch, string>({
+      query: (batchId) => API_ENDPOINTS.backend.imports.batchById(batchId),
+    }),
   }),
 });
 
 export const {
   useGetImportBatchesQuery,
   useGetSuppliersQuery,
+  useCreateManualPurchaseMutation,
+  useGetImportBatchByIdQuery,
 } = purchasesApi;

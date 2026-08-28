@@ -9,22 +9,25 @@ import {
   useGetSuppliersQuery,
 } from "@/lib/features/purchases/purchasesApi";
 import { Button } from "@/components/ui/button";
-import { 
-  FileText, 
+import {
+  FileText,
   FileSpreadsheet,
-  Upload, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  RefreshCw, 
-  ChevronLeft, 
-  ChevronRight, 
+  Upload,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
   User,
-  Calendar
+  Calendar,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ManualPurchasePanel } from "@/components/purchases/ManualPurchasePanel";
+import { BatchDetailPanel } from "@/components/purchases/BatchDetailPanel";
 
 export default function PurchasesImportsListPage() {
   const params = useParams();
@@ -35,6 +38,8 @@ export default function PurchasesImportsListPage() {
   // Pagination states
   const [offset, setOffset] = useState(0);
   const limit = 10;
+  const [isManualPurchaseOpen, setIsManualPurchaseOpen] = useState(false);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   // RTK Query fetches
   const { data: batchesData, isLoading: loading, refetch } = useGetImportBatchesQuery(
@@ -107,10 +112,16 @@ export default function PurchasesImportsListPage() {
   };
 
   const handleRowClick = (batch: ImportBatch) => {
-    if (batch.status === ImportBatchStatus.PendingReview) {
+    if (
+      batch.status === ImportBatchStatus.PendingReview ||
+      batch.status === ImportBatchStatus.Processing
+    ) {
       router.push(`/store/${storeId}/purchases/import?batch_id=${batch.id}`);
-    } else if (batch.status === ImportBatchStatus.Processing) {
-      router.push(`/store/${storeId}/purchases/import?batch_id=${batch.id}`);
+    } else if (
+      batch.status === ImportBatchStatus.Committed ||
+      batch.status === ImportBatchStatus.Discarded
+    ) {
+      setSelectedBatchId(batch.id);
     }
   };
 
@@ -127,7 +138,7 @@ export default function PurchasesImportsListPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             onClick={() => refetch()}
             variant="outline"
@@ -137,8 +148,16 @@ export default function PurchasesImportsListPage() {
           </Button>
 
           <Button
+            onClick={() => setIsManualPurchaseOpen(true)}
+            className="h-9.5 px-4 bg-brand hover:bg-indigo-750 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer border-none"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add  Purchase
+          </Button>
+
+          <Button
             onClick={() => router.push(`/store/${storeId}/purchases/import`)}
-            className="h-9.5 px-4 bg-[#FF6B5B] hover:bg-[#E05344] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="h-9.5 px-4 bg-[#FF6B5B] hover:bg-[#E05344] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer border-none"
           >
             <Upload className="h-3.5 w-3.5" />
             {t("imports.list.importButton")}
@@ -176,7 +195,8 @@ export default function PurchasesImportsListPage() {
           <div className="space-y-3.5">
             {batches.map((batch) => {
               const supplierName = getSupplierName(batch.party_id);
-              const itemsCount = batch.line_items ? batch.line_items.length : 0;
+              // line_items is NOT included in list responses — use line_items_count summary
+              const itemsCount = batch.line_items_count ?? null;
               const dateStr = new Date(batch.created_at).toLocaleDateString(
                 language === "hi" ? "hi-IN" : "en-US",
                 { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }
@@ -188,7 +208,9 @@ export default function PurchasesImportsListPage() {
                   onClick={() => handleRowClick(batch)}
                   className={cn(
                     "bg-white border border-[#E4E4F0] rounded-xl p-5 hover:border-[#4338CA]/40 transition-all select-none shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4",
-                    batch.status === ImportBatchStatus.PendingReview && "cursor-pointer hover:shadow-sm"
+                    (batch.status === ImportBatchStatus.PendingReview ||
+                      batch.status === ImportBatchStatus.Committed ||
+                      batch.status === ImportBatchStatus.Discarded) && "cursor-pointer hover:shadow-sm"
                   )}
                 >
                   <div className="flex items-start gap-4">
@@ -225,23 +247,25 @@ export default function PurchasesImportsListPage() {
                           <Calendar className="h-3.5 w-3.5 text-slate-400" />
                           {dateStr}
                         </span>
-                        <span className="flex items-center gap-1">
+                        {/* <span className="flex items-center gap-1">
                           <User className="h-3.5 w-3.5 text-slate-400" />
                           Uploaded by: {batch.uploaded_by || "System"}
-                        </span>
+                        </span> */}
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                    <div className="text-left md:text-right">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none mb-1">
-                        {t("imports.list.totalItems")}
-                      </span>
-                      <span className="text-sm font-extrabold text-[#151328]">
-                        {itemsCount} {t("imports.list.items")}
-                      </span>
-                    </div>
+                    {itemsCount !== null && (
+                      <div className="text-left md:text-right">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none mb-1">
+                          {t("imports.list.totalItems")}
+                        </span>
+                        <span className="text-sm font-extrabold text-[#151328]">
+                          {itemsCount} {t("imports.list.items")}
+                        </span>
+                      </div>
+                    )}
 
                     {batch.status === ImportBatchStatus.PendingReview && (
                       <Button
@@ -294,6 +318,24 @@ export default function PurchasesImportsListPage() {
           )}
         </div>
       )}
+
+      {/* Manual Purchase Panel */}
+      <ManualPurchasePanel
+        isOpen={isManualPurchaseOpen}
+        onClose={() => setIsManualPurchaseOpen(false)}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
+
+      {/* Batch Detail Slide-Over */}
+      <BatchDetailPanel
+        batchId={selectedBatchId}
+        supplierName={selectedBatchId ? getSupplierName(
+          batches.find((b) => b.id === selectedBatchId)?.party_id ?? null
+        ) : null}
+        onClose={() => setSelectedBatchId(null)}
+      />
     </div>
   );
 }

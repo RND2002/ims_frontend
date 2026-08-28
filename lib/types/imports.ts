@@ -68,7 +68,10 @@ export interface ImportBatch {
   uploaded_by: string;
   created_at: string;
   committed_at: string | null;
-  line_items: ImportLineItem[];
+  // Only present in detail endpoint (GET /batches/{batchId})
+  line_items?: ImportLineItem[];
+  // Only present in list endpoint summary responses
+  line_items_count?: number;
 }
 
 // Upload Payload (multipart/form-data)

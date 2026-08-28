@@ -13,6 +13,7 @@ import {
 import { ProductsTable } from "@/components/catalog/ProductsTable";
 import { ProductPanel } from "@/components/catalog/ProductPanel";
 import { ProductEmptyState } from "@/components/catalog/ProductEmptyState";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Search, ChevronDown, Download, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,12 @@ export default function CatalogPage() {
   const [createProduct] = useCreateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
+  // Confirm delete dialog states
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   const handlePageChange = (newOffset: number) => {
     setOffset(newOffset);
   };
@@ -111,25 +118,38 @@ export default function CatalogPage() {
     }
   };
 
-  const handleDeleteRow = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(productId).unwrap();
-        setSelectedIds((prev) => prev.filter((id) => id !== productId));
-      } catch (err) {
-        console.error("Failed to delete product:", err);
-      }
+  const handleDeleteRow = (productId: string) => {
+    setDeleteConfirmId(productId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    setIsDeleting(true);
+    try {
+      await deleteProduct(deleteConfirmId).unwrap();
+      setSelectedIds((prev) => prev.filter((id) => id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (confirm(`Are you sure you want to delete ${selectedIds.length} selected products?`)) {
-      try {
-        await Promise.all(selectedIds.map((id) => deleteProduct(id).unwrap()));
-        setSelectedIds([]);
-      } catch (err) {
-        console.error("Bulk delete failed:", err);
-      }
+  const handleBulkDelete = () => {
+    setShowBulkDeleteConfirm(true);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    setIsBulkDeleting(true);
+    try {
+      await Promise.all(selectedIds.map((id) => deleteProduct(id).unwrap()));
+      setSelectedIds([]);
+      setShowBulkDeleteConfirm(false);
+    } catch (err) {
+      console.error("Bulk delete failed:", err);
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -310,6 +330,33 @@ export default function CatalogPage() {
           setIsPanelOpen(false);
           setEditingProduct(null);
         }}
+      />
+
+      {/* Custom Confirm Dialogs */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+        loadingText="Deleting..."
+      />
+
+      <ConfirmDialog
+        isOpen={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={handleConfirmBulkDelete}
+        title="Delete Multiple Products"
+        message={`Are you sure you want to delete ${selectedIds.length} selected products? This action cannot be undone.`}
+        confirmText={`Delete ${selectedIds.length} Products`}
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isBulkDeleting}
+        loadingText="Deleting..."
       />
     </div>
   );

@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupFormData } from "@/lib/schemas/auth";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { sendOtp, verifyOtp, registerUser } from "@/lib/features/auth/authSlice";
+import { useSendOtpMutation, useVerifyOtpMutation, useRegisterUserMutation } from "@/lib/features/auth/authApi";
+import { apiSlice } from "@/lib/store/apiSlice";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { OtpInput } from "@/components/auth/OtpInput";
@@ -20,6 +21,9 @@ function SignupPageContent() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
+  const [sendOtp] = useSendOtpMutation();
+  const [verifyOtp] = useVerifyOtpMutation();
+  const [registerUser] = useRegisterUserMutation();
 
   // Steps: 1 = Phone, 2 = OTP, 3 = Details
   const [step, setStep] = useState(1);
@@ -63,12 +67,11 @@ function SignupPageContent() {
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate only the phone field using Zod
     const isPhoneValid = await trigger("phone");
     if (isPhoneValid) {
       try {
         const phoneVal = getValues("phone");
-        await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+        await sendOtp({ phone: "+91" + phoneVal }).unwrap();
         setStep(2);
         setCountdown(30);
         setOtpError(false);
@@ -80,22 +83,11 @@ function SignupPageContent() {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) {
-      setOtpError(true);
-      return;
-    }
-
+    if (otp.length !== 6) { setOtpError(true); return; }
     try {
       const phoneVal = getValues("phone");
-      const res = await dispatch(
-        verifyOtp({
-          phone: "+91" + phoneVal,
-          otp: otp,
-        })
-      ).unwrap();
-
+      const res = await verifyOtp({ phone: "+91" + phoneVal, otp }).unwrap();
       if (res.status === "login_success") {
-        // User already has an account, redirect directly to dashboard
         router.push("/dashboard");
       } else if (res.status === "requires_onboarding") {
         setStep(3);
@@ -109,7 +101,7 @@ function SignupPageContent() {
   const handleResendOtp = async () => {
     try {
       const phoneVal = getValues("phone");
-      await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+      await sendOtp({ phone: "+91" + phoneVal }).unwrap();
       setCountdown(30);
       setOtpError(false);
     } catch (err) {
@@ -119,16 +111,15 @@ function SignupPageContent() {
 
   const handleDetailsSubmit = async (data: SignupFormData) => {
     try {
-      // Sign up User using OTP registration thunk
-      await dispatch(
-        registerUser({
-          phone: "+91" + data.phone,
-          name: data.name,
-          email: data.email || null,
-        })
-      ).unwrap();
+      await registerUser({
+        phone: "+91" + data.phone,
+        name: data.name,
+        email: data.email || null,
+      }).unwrap();
 
-      // Redirect to dashboard
+      // Clear all stale RTK Query cache from previous user session
+      dispatch(apiSlice.util.resetApiState());
+
       router.push("/dashboard");
     } catch (err) {
       console.error("Signup/Onboarding failed:", err);

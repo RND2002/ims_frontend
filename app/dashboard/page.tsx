@@ -4,14 +4,19 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
-import { logoutUser } from "@/lib/features/auth/authSlice";
+import { useLogoutUserMutation } from "@/lib/features/auth/authApi";
+import { apiSlice } from "@/lib/store/apiSlice";
 
 export default function DashboardRedirectPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [logout] = useLogoutUserMutation();
 
-  // Use RTK Query to load stores
-  const { data: stores, error, isLoading } = useGetStoresQuery();
+  // Always fetch fresh stores on mount — prevents stale cache from a previous session
+  // routing a new user to someone else's store
+  const { data: stores, error, isLoading } = useGetStoresQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
     if (isLoading) return;
@@ -26,7 +31,9 @@ export default function DashboardRedirectPage() {
         errMsg.includes("token");
 
       if (isAuthError) {
-        dispatch(logoutUser());
+        // Clear stale cache before logging out
+        dispatch(apiSlice.util.resetApiState() as any);
+        logout();
         router.replace("/");
       }
       return;

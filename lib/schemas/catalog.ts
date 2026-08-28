@@ -6,7 +6,7 @@ export const productSchema = z
     sku: z.string().nullable().optional().or(z.literal("")),
     barcode: z.string().nullable().optional().or(z.literal("")),
     category_id: z.string().nullable().optional(),
-    unit_id: z.string().nullable().optional(),
+    unit_id: z.string().min(1, "Please select a unit"),
     tax_rate_id: z.string().nullable().optional(),
     cost_price: z.number().min(0, "Cost price must be 0 or greater"),
     selling_price: z.number().min(0, "Selling price must be 0 or greater"),

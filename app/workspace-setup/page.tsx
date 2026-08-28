@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { logoutUser } from "@/lib/features/auth/authSlice";
+import { useLogoutUserMutation } from "@/lib/features/auth/authApi";
 import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { CreateStoreDialog } from "@/components/dashboard/CreateStoreDialog";
@@ -16,6 +16,7 @@ export default function WorkspaceSetupPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { accessToken, user } = useAppSelector((state) => state.auth);
+  const [logout] = useLogoutUserMutation();
   
   // Use RTK Query to load stores
   const { data: stores = [], isLoading: storesLoading, error: storesError, refetch } = useGetStoresQuery();
@@ -40,7 +41,7 @@ export default function WorkspaceSetupPage() {
         errMsg.includes("token");
 
       if (isAuthError) {
-        dispatch(logoutUser());
+        logout();
         router.push("/");
       }
       return;
@@ -55,7 +56,7 @@ export default function WorkspaceSetupPage() {
 
   const handleLogout = async () => {
     try {
-      await dispatch(logoutUser()).unwrap();
+      await logout().unwrap();
       router.push("/login");
     } catch (err) {
       console.error("Logout failed:", err);

@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { createApiClient } from "@/lib/apiClient";
 import { store } from "@/lib/store";
+import { apiSlice } from "@/lib/store/apiSlice";
 import { API_ENDPOINTS } from "@/app/api/endpoints";
 import {
   ImportBatch,
@@ -189,8 +190,8 @@ export default function PurchaseImportPipelinePage() {
         setCurrentScreen("PROCESSING");
         startPolling(batchId);
       } else if (batchData.status === ImportBatchStatus.PendingReview) {
-        // Initialize line item states
-        initializeResolutions(batchData.line_items);
+        // Detail endpoint always returns line_items for review screen
+        initializeResolutions(batchData.line_items ?? []);
         setCurrentScreen("REVIEW");
       } else if (batchData.status === ImportBatchStatus.Committed) {
         setCurrentScreen("SUCCESS");
@@ -256,7 +257,7 @@ export default function PurchaseImportPipelinePage() {
           setBillNo(batchData.bill_no || "");
 
           if (batchData.status === ImportBatchStatus.PendingReview) {
-            initializeResolutions(batchData.line_items);
+            initializeResolutions(batchData.line_items ?? []);
             setCurrentScreen("REVIEW");
           } else if (batchData.status === ImportBatchStatus.Failed) {
             // Stay in processing but poll stops, show failed screen
@@ -310,7 +311,7 @@ export default function PurchaseImportPipelinePage() {
 
       if (batchData.status === ImportBatchStatus.PendingReview) {
         // Structured CSV: instant review, redirect straight to review screen
-        initializeResolutions(batchData.line_items);
+        initializeResolutions(batchData.line_items ?? []);
         setCurrentScreen("REVIEW");
       } else {
         // Image/Rough Text: Go to loading page to poll background AI task
@@ -436,7 +437,7 @@ export default function PurchaseImportPipelinePage() {
         if (!prev) return null;
         return {
           ...prev,
-          line_items: prev.line_items.map((item) =>
+          line_items: (prev.line_items ?? []).map((item) =>
             item.id === lineId ? { ...item, ...updatedItem } : item
           ),
         };
@@ -484,6 +485,8 @@ export default function PurchaseImportPipelinePage() {
     try {
       const client = createApiClient(store.getState);
       await client.post(API_ENDPOINTS.backend.imports.discard(batch.id));
+      // Invalidate the import batch list cache so purchases page auto-refreshes
+      dispatch(apiSlice.util.invalidateTags(["ImportBatch"]) as any);
       router.push(`/store/${storeId}/purchases`);
     } catch (err) {
       console.error("Discard failed:", err);
@@ -499,7 +502,7 @@ export default function PurchaseImportPipelinePage() {
     try {
       const client = createApiClient(store.getState);
 
-      const commitItems: LineItemCommitOverride[] = batch.line_items.map((item) => {
+      const commitItems: LineItemCommitOverride[] = (batch.line_items ?? []).map((item) => {
         const res = itemResolutions[item.id];
         return {
           id: item.id,
@@ -525,6 +528,8 @@ export default function PurchaseImportPipelinePage() {
       };
 
       await client.post(API_ENDPOINTS.backend.imports.commit(batch.id), payload);
+      // Invalidate the import batch list cache so purchases page auto-refreshes
+      dispatch(apiSlice.util.invalidateTags(["ImportBatch"]) as any);
       setCurrentScreen("SUCCESS");
     } catch (err: any) {
       setErrorText(err.message || "Failed to finalize and commit purchase ledger.");
@@ -536,7 +541,7 @@ export default function PurchaseImportPipelinePage() {
   // Bulk confirmation helper
   const handleConfirmAllSuggested = () => {
     if (!batch) return;
-    batch.line_items.forEach((item) => {
+    (batch.line_items ?? []).forEach((item) => {
       const isSuggested =
         item.match_status === ImportMatchStatus.Suggested ||
         item.match_status === ImportMatchStatus.AutoMatched;
@@ -585,7 +590,7 @@ export default function PurchaseImportPipelinePage() {
     if (!batch) return 0;
     // Unresolved if resolved_action is missing, or if it is MatchedExisting but resolved_product_id is missing,
     // or if CreatedNew but new_product details aren't filled.
-    return batch.line_items.filter((item) => {
+    return (batch.line_items ?? []).filter((item) => {
       const res = itemResolutions[item.id];
       if (!res) return true;
       if (res.resolved_action === ImportResolvedAction.MatchedExisting && !res.resolved_product_id) return true;
@@ -845,7 +850,7 @@ export default function PurchaseImportPipelinePage() {
   const autoMatchedItems: ImportLineItem[] = [];
 
   if (batch) {
-    batch.line_items.forEach((item) => {
+    (batch.line_items ?? []).forEach((item) => {
       const res = itemResolutions[item.id];
       const isUnresolved = !res ||
         (res.resolved_action === ImportResolvedAction.MatchedExisting && !res.resolved_product_id) ||
@@ -1078,7 +1083,7 @@ export default function PurchaseImportPipelinePage() {
                 {t("imports.review.lineItems")}
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#EEF2FF] text-[#4338CA]">
-                {batch ? batch.line_items.length : 0} {t("imports.review.totalItemsCount")}
+                {batch ? (batch.line_items?.length ?? 0) : 0} {t("imports.review.totalItemsCount")}
               </span>
               {unresCount > 0 && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 animate-pulse border border-amber-200">

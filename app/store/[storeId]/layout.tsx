@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { logoutUser } from "@/lib/features/auth/authSlice";
+import { useLogoutUserMutation } from "@/lib/features/auth/authApi";
 import { setActiveStoreClient } from "@/lib/features/stores/storesSlice";
 import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
 import { fetchMembers } from "@/lib/features/members/membersSlice";
@@ -60,6 +60,7 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
   const { members } = useAppSelector((state) => state.members);
   const { t, language, setLanguage } = useLanguage();
   
+  const [logout] = useLogoutUserMutation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCreateStoreOpen, setIsCreateStoreOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -78,7 +79,7 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
         errMsg.includes("token");
 
       if (isAuthError) {
-        dispatch(logoutUser());
+        logout();
         router.push("/");
       }
       return;
@@ -114,7 +115,7 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
 
   const handleLogout = async () => {
     try {
-      await dispatch(logoutUser()).unwrap();
+      await logout().unwrap();
       router.push("/login");
     } catch (err) {
       console.error("Logout failed:", err);

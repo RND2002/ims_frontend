@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { refreshSession } from "@/lib/features/auth/authSlice";
+import { authApi } from "@/lib/features/auth/authApi";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { NavBar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     const silentCheck = async () => {
       try {
-        const result = await dispatch(refreshSession()).unwrap();
+        const result = await dispatch(authApi.endpoints.refreshSession.initiate()).unwrap();
         if (result && result.access_token) {
           router.replace("/dashboard");
         }

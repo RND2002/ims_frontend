@@ -137,12 +137,12 @@ export function ProductRow({
       {/* Status Badges */}
       <td className="px-4 py-3.5 hidden lg:table-cell">{statusBadge}</td>
 
-      {/* Actions (hover triggers) */}
+      {/* Actions */}
       <td className="px-4 py-3.5 text-right relative w-12" ref={dropdownRef}>
         <div className="flex items-center justify-end">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="opacity-0 group-hover:opacity-100 hover:bg-[#E4E4F0] p-1.5 rounded-lg text-[#65637D] hover:text-[#151328] transition-all cursor-pointer outline-none shrink-0"
+            className="hover:bg-[#E4E4F0] p-1.5 rounded-lg text-[#65637D] hover:text-[#151328] transition-all cursor-pointer outline-none shrink-0"
           >
             <MoreHorizontal className="h-4.5 w-4.5" />
           </button>

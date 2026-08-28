@@ -81,7 +81,7 @@ export const salesApi = apiSlice.injectEndpoints({
         body: payload,
       }),
       transformResponse: (response: Sale) => parseSaleNumbers(response),
-      invalidatesTags: ["Sale", "Party"],
+      invalidatesTags: ["Sale", "Party", "Product"],
     }),
     createCustomer: builder.mutation<Party, { name: string; phone: string }>({
       query: (payload) => ({

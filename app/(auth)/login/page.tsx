@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormData } from "@/lib/schemas/auth";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { sendOtp, verifyOtp } from "@/lib/features/auth/authSlice";
+import { useAppSelector } from "@/lib/store/hooks";
+import { useSendOtpMutation, useVerifyOtpMutation } from "@/lib/features/auth/authApi";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,9 @@ import { Button } from "@/components/ui/button";
 export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
+  const [sendOtp, { isLoading: sendingOtp }] = useSendOtpMutation();
+  const [verifyOtp, { isLoading: verifyingOtp }] = useVerifyOtpMutation();
 
   // Steps: 1 = Phone, 2 = OTP Input
   const [step, setStep] = useState(1);
@@ -49,12 +50,11 @@ export default function LoginPage() {
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate phone input using Zod before advancing
     const isPhoneValid = await trigger("phone");
     if (isPhoneValid) {
       try {
         const phoneVal = getValues("phone");
-        await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+        await sendOtp({ phone: "+91" + phoneVal }).unwrap();
         setStep(2);
         setCountdown(30);
         setOtpError(false);
@@ -65,19 +65,9 @@ export default function LoginPage() {
   };
 
   const handleLoginSubmit = async (data: LoginFormData) => {
-    if (otp.length !== 6) {
-      setOtpError(true);
-      return;
-    }
-
+    if (otp.length !== 6) { setOtpError(true); return; }
     try {
-      const res = await dispatch(
-        verifyOtp({
-          phone: "+91" + data.phone,
-          otp: otp,
-        })
-      ).unwrap();
-
+      const res = await verifyOtp({ phone: "+91" + data.phone, otp }).unwrap();
       if (res.status === "login_success") {
         router.push("/dashboard");
       } else if (res.status === "requires_onboarding") {
@@ -92,7 +82,7 @@ export default function LoginPage() {
   const handleResendOtp = async () => {
     try {
       const phoneVal = getValues("phone");
-      await dispatch(sendOtp("+91" + phoneVal)).unwrap();
+      await sendOtp({ phone: "+91" + phoneVal }).unwrap();
       setCountdown(30);
       setOtpError(false);
     } catch (err) {

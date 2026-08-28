@@ -5,6 +5,7 @@ import catalogReducer from "../features/catalog/catalogSlice";
 import salesReducer from "../features/sales/salesSlice";
 import membersReducer from "../features/members/membersSlice";
 import { apiSlice } from "./apiSlice";
+import { listenerMiddleware } from "./middleware";
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +17,9 @@ export const store = configureStore({
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware),
+    getDefaultMiddleware()
+      .prepend(listenerMiddleware.middleware) // fires before RTK Query middleware
+      .concat(apiSlice.middleware),
   devTools: process.env.NODE_ENV !== "production",
 });
 

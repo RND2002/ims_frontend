@@ -47,6 +47,7 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
 
   const saving = isCreating || isUpdating;
   const [activeTab, setActiveTab] = useState<TabType>("details");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Format options for select dropdowns
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
@@ -145,6 +146,7 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
   };
 
   const onSubmit = async (data: ProductFormData) => {
+    setSubmitError(null);
     try {
       if (product) {
         // Edit mode
@@ -180,8 +182,9 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
         }).unwrap();
       }
       onClose();
-    } catch (err) {
-      console.error("Save product thunk failed:", err);
+    } catch (err: any) {
+      console.error("Save product failed:", err);
+      setSubmitError(err?.data?.detail || err?.message || "Failed to save product");
     }
   };
 
@@ -251,6 +254,11 @@ export function ProductPanel({ isOpen, onClose, product }: ProductPanelProps) {
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {activeTab === "details" && (
             <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+              {submitError && (
+                <div className="rounded-lg bg-red-50 p-3 border border-red-200 text-xs font-semibold text-red-700">
+                  {submitError}
+                </div>
+              )}
               
               {/* Group 1: Basic Information */}
               <div className="space-y-4">

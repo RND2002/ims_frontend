@@ -23,6 +23,7 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 export default function ExpensesPage() {
@@ -42,6 +43,9 @@ export default function ExpensesPage() {
   const [newDescription, setNewDescription] = useState("");
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // Confirm delete dialog state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // RTK Query hooks
   const { data, isLoading: loading, refetch } = useGetExpensesQuery({
@@ -52,6 +56,7 @@ export default function ExpensesPage() {
 
   const [createExpense, { isLoading: isCreating }] = useCreateExpenseMutation();
   const [deleteExpense] = useDeleteExpenseMutation();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const expenses = data?.items || [];
   const totalCount = data?.total || 0;
@@ -105,13 +110,20 @@ export default function ExpensesPage() {
   };
 
   // Handle delete
-  const handleDeleteRow = async (id: string) => {
-    if (confirm("Are you sure you want to delete this expense?")) {
-      try {
-        await deleteExpense(id).unwrap();
-      } catch (err) {
-        console.error("Failed to delete expense:", err);
-      }
+  const handleDeleteRow = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    setIsDeleting(true);
+    try {
+      await deleteExpense(deleteConfirmId).unwrap();
+    } catch (err) {
+      console.error("Failed to delete expense:", err);
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmId(null);
     }
   };
 
@@ -383,6 +395,19 @@ export default function ExpensesPage() {
           </div>
         </div>
       )}
+      {/* Custom Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Expense"
+        message="Are you sure you want to delete this expense entry? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+        loadingText="Deleting..."
+      />
     </div>
   );
 }
