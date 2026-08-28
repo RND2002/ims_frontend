@@ -3,9 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { createNewStore } from "@/lib/features/stores/storesSlice";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCreateStoreMutation } from "@/lib/features/stores/storesApi";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -27,9 +26,12 @@ interface CreateStoreDialogProps {
 }
 
 export function CreateStoreDialog({ isOpen, onClose, onSuccess }: CreateStoreDialogProps) {
-  const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.stores);
+  const [createStore, { isLoading: loading, error: mutationError }] = useCreateStoreMutation();
   const { t } = useLanguage();
+
+  const error = mutationError
+    ? (mutationError as any)?.data?.detail || "Failed to create store"
+    : null;
 
   const {
     register,
@@ -50,14 +52,12 @@ export function CreateStoreDialog({ isOpen, onClose, onSuccess }: CreateStoreDia
 
   const onSubmit = async (data: CreateStoreFormData) => {
     try {
-      await dispatch(
-        createNewStore({
-          name: data.name,
-          business_type: data.business_type,
-          address: data.address,
-          gstin: data.gstin || undefined,
-        })
-      ).unwrap();
+      await createStore({
+        name: data.name,
+        business_type: data.business_type,
+        address: data.address,
+        gstin: data.gstin || undefined,
+      }).unwrap();
       reset();
       if (onSuccess) {
         onSuccess();

@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { switchStore, Store } from "@/lib/features/stores/storesSlice";
+import { setActiveStoreClient, Store } from "@/lib/features/stores/storesSlice";
+import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
 
 interface WorkspaceSwitcherProps {
   onCreateStoreClick: () => void;
@@ -30,7 +31,10 @@ export const getAvatarColorClass = (storeId: string) => {
 export function WorkspaceSwitcher({ onCreateStoreClick }: WorkspaceSwitcherProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { stores, activeStore } = useAppSelector((state) => state.stores);
+  
+  // Use RTK Query to load stores list
+  const { data: stores = [] } = useGetStoresQuery();
+  const { activeStore } = useAppSelector((state) => state.stores);
   
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,7 +51,10 @@ export function WorkspaceSwitcher({ onCreateStoreClick }: WorkspaceSwitcherProps
   }, []);
 
   const handleStoreSelect = (storeId: string) => {
-    dispatch(switchStore(storeId));
+    const selected = stores.find((s) => s.id === storeId);
+    if (selected) {
+      dispatch(setActiveStoreClient(selected));
+    }
     setIsOpen(false);
     router.push(`/store/${storeId}`);
   };

@@ -14,7 +14,7 @@ export function OtpInput({ value, onChange, error }: OtpInputProps) {
       maxLength={6}
       value={value}
       onChange={onChange}
-      containerClassName="group flex items-center justify-between gap-2 max-w-[340px] mx-auto font-sans"
+      containerClassName="group flex items-center justify-between gap-1.5 max-w-[280px] mx-auto font-sans"
       render={({ slots }) => (
         <>
           {slots.map((slot, idx) => (
@@ -29,7 +29,7 @@ export function OtpInput({ value, onChange, error }: OtpInputProps) {
 function Slot(props: SlotProps & { error?: boolean }) {
   return (
     <div
-      className={`relative h-12 w-12 text-center text-lg font-bold border rounded-lg bg-bg-surface flex items-center justify-center transition-all ${
+      className={`relative h-10 w-10 text-center text-base font-bold border rounded-lg bg-bg-surface flex items-center justify-center transition-all ${
         props.isActive
           ? "border-2 border-brand ring-4 ring-brand-light/50"
           : props.error
@@ -40,7 +40,7 @@ function Slot(props: SlotProps & { error?: boolean }) {
       {props.char !== null && <span>{props.char}</span>}
       {props.hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-0.5 h-5 bg-brand animate-pulse" />
+          <div className="w-0.5 h-4 bg-brand animate-pulse" />
         </div>
       )}
     </div>

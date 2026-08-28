@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { refreshSession, logoutUser } from "@/lib/features/auth/authSlice";
-import { fetchStores } from "@/lib/features/stores/storesSlice";
+import { logoutUser } from "@/lib/features/auth/authSlice";
+import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { CreateStoreDialog } from "@/components/dashboard/CreateStoreDialog";
 import { InviteMemberDialog } from "@/components/dashboard/InviteMemberDialog";
@@ -16,7 +16,10 @@ export default function WorkspaceSetupPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { accessToken, user } = useAppSelector((state) => state.auth);
-  const { stores, loading: storesLoading } = useAppSelector((state) => state.stores);
+  
+  // Use RTK Query to load stores
+  const { data: stores = [], isLoading: storesLoading, error: storesError, refetch } = useGetStoresQuery();
+  
   const { t, language, setLanguage } = useLanguage();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,33 +27,31 @@ export default function WorkspaceSetupPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // Authenticate user and load workspaces
-  // Load workspaces on mount
+  // Load workspaces on mount/changes via RTK Query
   useEffect(() => {
-    let active = true;
-    const initLayout = async () => {
-      try {
-        const loadedStores = await dispatch(fetchStores()).unwrap();
-        if (loadedStores.length > 0) {
-          if (active) router.push(`/store/${loadedStores[0].id}`);
-          return;
-        }
-        if (active) setIsAuthChecking(false);
-      } catch {
-        try {
-          await dispatch(logoutUser()).unwrap();
-        } catch (logoutErr) {
-          console.error("Failed to clean up session in workspace-setup:", logoutErr);
-        }
-        if (active) router.push("/");
+    if (storesLoading) return;
+
+    if (storesError) {
+      const errMsg = JSON.stringify(storesError).toLowerCase();
+      const isAuthError =
+        errMsg.includes("401") ||
+        errMsg.includes("unauthorized") ||
+        errMsg.includes("expired") ||
+        errMsg.includes("token");
+
+      if (isAuthError) {
+        dispatch(logoutUser());
+        router.push("/");
       }
-    };
-    
-    initLayout();
-    return () => {
-      active = false;
-    };
-  }, [dispatch, router]);
+      return;
+    }
+
+    if (stores.length > 0) {
+      router.push(`/store/${stores[0].id}`);
+    } else {
+      setIsAuthChecking(false);
+    }
+  }, [stores, storesLoading, storesError, router, dispatch]);
 
   const handleLogout = async () => {
     try {
@@ -209,22 +210,27 @@ export default function WorkspaceSetupPage() {
       {/* Invite Dialog */}
       <InviteMemberDialog
         isOpen={isInviteOpen}
-        onClose={() => {
+        onClose={async () => {
           setIsInviteOpen(false);
-          // Refresh page / redirect after done
-          dispatch(fetchStores()).then((res: any) => {
-            if (res.payload && res.payload.length > 0) {
-              router.push(`/store/${res.payload[0].id}`);
+          try {
+            const res = await refetch().unwrap();
+            if (res && res.length > 0) {
+              router.push(`/store/${res[0].id}`);
             }
-          });
+          } catch (err) {
+            console.error("Failed to refetch stores after invite:", err);
+          }
         }}
-        onSkip={() => {
+        onSkip={async () => {
           setIsInviteOpen(false);
-          dispatch(fetchStores()).then((res: any) => {
-            if (res.payload && res.payload.length > 0) {
-              router.push(`/store/${res.payload[0].id}`);
+          try {
+            const res = await refetch().unwrap();
+            if (res && res.length > 0) {
+              router.push(`/store/${res[0].id}`);
             }
-          });
+          } catch (err) {
+            console.error("Failed to refetch stores after skip:", err);
+          }
         }}
       />
     </div>

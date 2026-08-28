@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { refreshSession, logoutUser } from "@/lib/features/auth/authSlice";
-import { fetchStores, setActiveStoreClient, switchStore } from "@/lib/features/stores/storesSlice";
+import { logoutUser } from "@/lib/features/auth/authSlice";
+import { setActiveStoreClient } from "@/lib/features/stores/storesSlice";
+import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
 import { fetchMembers } from "@/lib/features/members/membersSlice";
 import { usePermission } from "@/lib/hooks/usePermission";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -51,7 +52,11 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
   
   const dispatch = useAppDispatch();
   const { accessToken, user } = useAppSelector((state) => state.auth);
-  const { stores, activeStore, loading: storesLoading } = useAppSelector((state) => state.stores);
+  
+  // Use RTK Query to load stores list
+  const { data: stores = [], isLoading: storesLoading, error: storesError } = useGetStoresQuery();
+  const { activeStore } = useAppSelector((state) => state.stores);
+
   const { members } = useAppSelector((state) => state.members);
   const { t, language, setLanguage } = useLanguage();
   
@@ -60,33 +65,27 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // Load stores on mount
+  // Load stores on mount / check auth status
   useEffect(() => {
-    let active = true;
-    const initLayout = async () => {
-      if (stores.length === 0 && !storesLoading) {
-        try {
-          await dispatch(fetchStores()).unwrap();
-        } catch {
-          try {
-            await dispatch(logoutUser()).unwrap();
-          } catch (logoutErr) {
-            console.error("Failed to clean up session in store layout:", logoutErr);
-          }
-          if (active) router.push("/");
-          return;
-        }
+    if (storesLoading) return;
+
+    if (storesError) {
+      const errMsg = JSON.stringify(storesError).toLowerCase();
+      const isAuthError =
+        errMsg.includes("401") ||
+        errMsg.includes("unauthorized") ||
+        errMsg.includes("expired") ||
+        errMsg.includes("token");
+
+      if (isAuthError) {
+        dispatch(logoutUser());
+        router.push("/");
       }
-      if (active) {
-        setIsAuthChecking(false);
-      }
-    };
-    
-    initLayout();
-    return () => {
-      active = false;
-    };
-  }, [dispatch, router, stores.length, storesLoading]);
+      return;
+    }
+
+    setIsAuthChecking(false);
+  }, [storesLoading, storesError, router, dispatch]);
 
   // Sync route storeId param with activeStore state
   useEffect(() => {
@@ -94,14 +93,13 @@ export default function StoreWorkspaceLayout({ children }: { children: React.Rea
 
     const matchingStore = stores.find((s) => s.id === storeId);
     if (!matchingStore) {
-      // If store ID is invalid for this user, redirect to default dashboard (which redirects to their first store or workspace-setup)
+      // If store ID is invalid for this user, redirect to default dashboard
       router.push("/dashboard");
       return;
     }
 
     if (!activeStore || activeStore.id !== storeId) {
       dispatch(setActiveStoreClient(matchingStore));
-      dispatch(switchStore(storeId));
     }
   }, [storeId, stores, storesLoading, activeStore, dispatch, router]);
 

@@ -6,11 +6,9 @@ export const storesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getStores: builder.query<Store[], void>({
       query: () => API_ENDPOINTS.backend.stores.base,
+      providesTags: ["Store"],
     }),
-    getActiveStore: builder.query<Store, void>({
-      query: () => API_ENDPOINTS.backend.stores.activeStore,
-    }),
-    createNewStore: builder.mutation<
+    createStore: builder.mutation<
       Store,
       {
         name: string;
@@ -28,7 +26,8 @@ export const storesApi = apiSlice.injectEndpoints({
         url: API_ENDPOINTS.backend.stores.base,
         method: "POST",
         body: {
-          ...payload,
+          name: payload.name,
+          business_type: payload.business_type,
           address: payload.address || "India",
           gstin: payload.gstin || "stringstringstr",
           currency: payload.currency || "INR",
@@ -38,20 +37,12 @@ export const storesApi = apiSlice.injectEndpoints({
           plan_tier: payload.plan_tier || "free",
         },
       }),
-    }),
-    switchStore: builder.mutation<void, string>({
-      query: (storeId) => ({
-        url: API_ENDPOINTS.backend.stores.activeStore,
-        method: "POST",
-        body: { store_id: storeId },
-      }),
+      invalidatesTags: ["Store"],
     }),
   }),
 });
 
 export const {
   useGetStoresQuery,
-  useGetActiveStoreQuery,
-  useCreateNewStoreMutation,
-  useSwitchStoreMutation,
+  useCreateStoreMutation,
 } = storesApi;

@@ -2,37 +2,44 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { fetchStores } from "@/lib/features/stores/storesSlice";
-import { refreshSession, logoutUser } from "@/lib/features/auth/authSlice";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { useGetStoresQuery } from "@/lib/features/stores/storesApi";
+import { logoutUser } from "@/lib/features/auth/authSlice";
 
 export default function DashboardRedirectPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.auth);
+
+  // Use RTK Query to load stores
+  const { data: stores, error, isLoading } = useGetStoresQuery();
 
   useEffect(() => {
-    const checkAndRedirect = async () => {
-      try {
-        const stores = await dispatch(fetchStores()).unwrap();
-        if (stores && stores.length > 0) {
-          router.replace(`/store/${stores[0].id}`);
-        } else {
-          router.replace("/workspace-setup");
-        }
-      } catch (err) {
-        console.error("Failed to load stores during redirect:", err);
-        try {
-          await dispatch(logoutUser()).unwrap();
-        } catch (logoutErr) {
-          console.error("Failed to clean up session:", logoutErr);
-        }
+    if (isLoading) return;
+
+    if (error) {
+      console.error("Failed to load stores during redirect:", error);
+      const errMsg = JSON.stringify(error).toLowerCase();
+      const isAuthError =
+        errMsg.includes("401") ||
+        errMsg.includes("unauthorized") ||
+        errMsg.includes("expired") ||
+        errMsg.includes("token");
+
+      if (isAuthError) {
+        dispatch(logoutUser());
         router.replace("/");
       }
-    };
+      return;
+    }
 
-    checkAndRedirect();
-  }, [dispatch, router]);
+    if (stores) {
+      if (stores.length > 0) {
+        router.replace(`/store/${stores[0].id}`);
+      } else {
+        router.replace("/workspace-setup");
+      }
+    }
+  }, [stores, error, isLoading, router, dispatch]);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-[#F7F7FB] font-sans">

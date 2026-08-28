@@ -45,7 +45,7 @@ export const baseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Product", "Category", "Unit", "TaxRate", "Sale", "Party", "Member", "Expense"],
+  tagTypes: ["Product", "Category", "Unit", "TaxRate", "Sale", "Party", "Member", "Expense", "Store"],
   keepUnusedDataFor: 300, // keep cached data in memory for 5 minutes when unused
   endpoints: () => ({}),
 });

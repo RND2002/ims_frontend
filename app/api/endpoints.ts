@@ -1,4 +1,7 @@
-export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+export const BACKEND_URL =
+  typeof window === "undefined"
+    ? (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000")
+    : "";
 
 export const API_ENDPOINTS = {
   // Proxy Auth Routes (Next.js API Route Handlers)
